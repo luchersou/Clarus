@@ -1,0 +1,38 @@
+# .gitignore (raiz)
+
+# Dependências
+node_modules/
+apps/**/node_modules/
+packages/**/node_modules/
+
+# Build outputs
+apps/**/.next/
+apps/**/dist/
+apps/**/build/
+
+# Variáveis de ambiente (nunca versionar valores reais)
+apps/**/.env
+apps/**/.env.local
+apps/**/.env.*.local
+!apps/**/.env.example
+
+# Python
+apps/rag-service/venv/
+apps/rag-service/__pycache__/
+apps/rag-service/*.pyc
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Prisma (gerado automaticamente, não precisa versionar)
+apps/**/prisma/migrations/dev.db
