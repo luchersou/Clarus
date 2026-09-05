@@ -5,9 +5,9 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="flex min-h-full flex-col">
-      {/* header entra aqui quando você fizer a navbar */}
+      {/* header */}
       <main className="flex-1">{children}</main>
-      {/* footer entra aqui quando você fizer a seção de footer */}
+      {/* footer  */}
     </div>
   );
 }
