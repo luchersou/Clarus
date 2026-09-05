@@ -55,13 +55,13 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.55 0.14 155);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.705 0.213 47.604);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -126,5 +126,21 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .notched-card {
+    --notch: clamp(20px, 1vw, 40px);
+    clip-path: polygon(
+      var(--notch) 0%,
+      calc(100% - var(--notch)) 0%,
+      100% var(--notch),
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      var(--notch) 100%,
+      0% calc(100% - var(--notch)),
+      0% var(--notch)
+    );
   }
 }
