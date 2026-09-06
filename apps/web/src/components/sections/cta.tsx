@@ -4,10 +4,10 @@ import { ArrowRight, FileCheck } from "lucide-react";
 export function CTA() {
   return (
     <section id="cta" className="w-full max-w-6xl mx-auto px-4 py-12 md:py-24 relative z-20">
-      <div className="relative group rounded-2xl md:rounded-4xl overflow-hidden bg-zinc-950 border-2 border-white/5 shadow-2xl transition-all duration-500 hover:border-white/10">
+      <div className="relative bg-noise notched-card group rounded-2xl md:rounded-4xl overflow-hidden bg-zinc-950 border-2 border-white/5 shadow-2xl transition-all duration-500 hover:border-white/10">
 
         {/* Subtle glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/15 rounded-full blur-3xl pointer-events-none transition-bg duration-500 group-hover:bg-primary/30" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl pointer-events-none transition-bg duration-500 group-hover:bg-primary/25" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-8 py-12 md:p-16 gap-16">
           {/* Left content */}
@@ -65,7 +65,7 @@ export function CTA() {
           </div>
 
           {/* Right visual */}
-          <div className="flex-1 w-full relative hidden md:block">
+          <div className="flex-1 w-full relative hidden md:block notched-card">
             <div className="absolute inset-0 bg-primary/[0.03] blur-3xl rounded-full" />
             <div className="relative rounded-2xl border-2 border-white/5 bg-black/60 backdrop-blur-xl p-6 shadow-2xl overflow-hidden group-hover:-translate-y-2 transition-transform duration-700">
               <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-6">
