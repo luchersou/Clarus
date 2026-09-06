@@ -61,7 +61,7 @@ export function FeaturesBento() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className={`group relative overflow-hidden rounded-2xl border border-border bg-card p-8 ${feature.span}`}
+              className={`group notched-card relative overflow-hidden rounded-2xl border border-border bg-card p-8 ${feature.span}`}
             >
               <div className="relative z-10 flex h-full flex-col justify-between gap-4">
                 <div>
