@@ -1,3 +1,4 @@
+import { CTA } from "@/components/sections/cta";
 import { FAQ } from "@/components/sections/faq";
 import { FeaturesBento } from "@/components/sections/features-bento/features-bento";
 import { Hero } from "@/components/sections/hero";
@@ -10,8 +11,7 @@ export default function Home() {
       <HowItWorks />
       <FeaturesBento />
       <FAQ />
-      {/* <Testimonials /> */}
-      {/* <Footer /> */}
+      <CTA />
     </>
   );
 }
