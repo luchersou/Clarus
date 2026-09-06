@@ -51,7 +51,7 @@ const FEATURES: Feature[] = [
 
 export function FeaturesBento() {
   return (
-    <section className="dark notched-card bg-background px-4 py-24 mx-2 text-foreground md:px-6 md:py-32">
+    <section id="features" className="dark notched-card bg-background px-4 py-24 mx-2 text-foreground md:px-6 md:py-32">
       <div className="mx-auto max-w-6xl">
         <h2 className="mb-16 text-center text-3xl font-semibold tracking-tight md:text-4xl">
           Everything a financial document needs

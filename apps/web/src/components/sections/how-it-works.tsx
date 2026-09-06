@@ -146,7 +146,7 @@ export function HowItWorks() {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section className="px-4 py-24 md:px-6 md:py-32">
+    <section id="how-it-works" className="px-4 py-24 md:px-6 md:py-32">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-24 text-center text-3xl font-semibold tracking-tight md:text-4xl">
           How it works
