@@ -1,13 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
     <footer className="relative flex flex-col justify-between h-screen min-h-125 overflow-hidden pt-12 pb-6 notched-card">
       
       {/* 1. Background Image Layer */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center pointer-events-none opacity-50 bg-[url('/wallpaper.jpg')]"
-      />
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
+        <Image
+          src="/footer-bg.jpg"
+          alt=""
+          fill
+          loading="lazy"
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+      </div>
 
       {/* 2. Giant Background Text Layer */}
       <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center translate-y-[20%] pointer-events-none select-none overflow-hidden">

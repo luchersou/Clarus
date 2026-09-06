@@ -3,7 +3,7 @@ import { DashboardPreview } from "../dashboard-preview";
 
 export function Hero() {
   return (
-    <section className="px-4 py-8 md:px-6 md:py-12">
+    <section className="px-2 py-5 md:px-6">
       <div className="relative">
         {/* border layer */}
         <div className="notched-card absolute inset-0 bg-border" />
