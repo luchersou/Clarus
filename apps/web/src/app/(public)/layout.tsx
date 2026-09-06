@@ -1,3 +1,5 @@
+import { Footer } from "@/components/sections/footer";
+
 export default function MarketingLayout({
   children,
 }: {
@@ -7,7 +9,7 @@ export default function MarketingLayout({
     <div className="flex min-h-full flex-col">
       {/* header */}
       <main className="flex-1">{children}</main>
-      {/* footer  */}
+      <Footer />
     </div>
   );
 }
