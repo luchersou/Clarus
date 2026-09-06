@@ -8,7 +8,7 @@ export function Footer() {
       {/* 1. Background Image Layer */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
         <Image
-          src="/footer-bg.jpg"
+          src="/wallpaper.jpg"
           alt=""
           fill
           loading="lazy"
