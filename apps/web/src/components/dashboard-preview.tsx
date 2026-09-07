@@ -107,23 +107,7 @@ export function DashboardPreview() {
   }, []);
 
   return (
-    <section className="hidden sm:block relative w-full max-w-6xl mx-auto px-4 py-24">
-      {/* Ambient glow */}
-      <div
-        className="
-          pointer-events-none
-          absolute
-          left-1/2
-          top-20
-          -translate-x-1/2
-          w-[70%]
-          h-[420px]
-          rounded-full
-          bg-primary/5
-          blur-[100px]
-        "
-      />
-
+    <section className="hidden sm:block relative w-full max-w-6xl mx-auto px-4 pt-12">
       {/* Dashboard container */}
       <div className="relative">
         {/* Interactive dashboard */}
@@ -136,8 +120,8 @@ export function DashboardPreview() {
             border-border
             bg-card
             overflow-hidden
-            shadow-[0_30px_80px_-25px_rgba(0,0,0,0.30)]
             will-change-transform
+            shadow-[0_-15px_35px_-20px_rgba(0,0,0,0.35),-15px_0_30px_-20px_rgba(0,0,0,0.25),15px_0_30px_-20px_rgba(0,0,0,0.25)]
           "
           style={{
             transform:

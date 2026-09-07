@@ -3,14 +3,10 @@ import { DashboardPreview } from "../dashboard-preview";
 
 export function Hero() {
   return (
-    <section className="px-2 py-5 md:px-6">
-      <div className="relative">
-        {/* border layer */}
-        <div className="notched-card absolute inset-0 bg-border" />
-        {/* translucent fill layer */}
-        <div className="notched-card absolute inset-[1.5px] bg-primary/5" />
+    <section className="px-2 py-15 md:px-6 bg-gray-100">
+      <div className="relative overflow-hidden">
 
-        <div className="relative flex flex-col items-center gap-8 px-8 py-20 text-center md:px-16 md:py-28">
+        <div className="relative flex flex-col items-center gap-8 px-8 pt-20 md:pt-30 text-center md:px-16 ">
           <h1 className="text-6xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
             Ask your documents.
           </h1>
@@ -22,11 +18,12 @@ export function Hero() {
 
           <div className="flex gap-3">
             <Button size="lg">Get started for free</Button>
-          </div>
-
-					<DashboardPreview />
+          </div>          
         </div>
+
       </div>
+
+      <DashboardPreview />      
     </section>
   );
 }
