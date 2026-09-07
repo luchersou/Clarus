@@ -109,6 +109,7 @@ export function DashboardPreview() {
   return (
     <section className="hidden sm:block relative w-full max-w-6xl mx-auto px-4 pt-12">
       {/* Dashboard container */}
+      
       <div className="relative">
         {/* Interactive dashboard */}
         <div
