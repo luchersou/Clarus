@@ -5,7 +5,7 @@ export function Hero() {
   return (
     <section className="px-2 pb-2 md:px-6 bg-gray-100">
 
-      // Background grid
+      {/* Background grid */}
       <div
         className="
           pointer-events-none

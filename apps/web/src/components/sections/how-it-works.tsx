@@ -1,13 +1,19 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { FileText } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+} from "framer-motion";
+import { Check, FileText } from "lucide-react";
 
 const ACTIONS = [
   { label: "Summary", active: false },
   { label: "Extract values", active: true },
   { label: "Deadlines", active: false },
+  { label: "Compare", active: false },
 ];
 
 const RESULT = [
@@ -17,31 +23,44 @@ const RESULT = [
 
 function UploadVisual() {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
-      <FileText className="size-4 text-muted-foreground" />
-      <div>
-        <p className="text-sm font-medium">Supplier_Contract.pdf</p>
-        <p className="text-xs text-muted-foreground">2.4 MB</p>
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <FileText className="size-4" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium">Supplier_Contract.pdf</p>
+          <p className="text-xs text-muted-foreground">2.4 MB · PDF</p>
+        </div>
       </div>
+      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="h-full w-full rounded-full bg-primary" />
+      </div>
+      <p className="mt-1.5 text-right font-mono text-[10px] text-muted-foreground">
+        Uploaded
+      </p>
     </div>
   );
 }
 
 function ActionVisual() {
   return (
-    <div className="flex flex-wrap gap-2">
-      {ACTIONS.map(({ label, active }) => (
-        <div
-          key={label}
-          className={
-            active
-              ? "rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-              : "rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground"
-          }
-        >
-          {label}
-        </div>
-      ))}
+    <div className="rounded-xl border border-border bg-card p-2">
+      <div className="flex flex-col gap-1">
+        {ACTIONS.map(({ label, active }) => (
+          <div
+            key={label}
+            className={
+              active
+                ? "flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground"
+                : "flex items-center justify-between rounded-lg px-3 py-2 text-xs text-muted-foreground"
+            }
+          >
+            {label}
+            {active && <Check className="size-3.5" />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -56,6 +75,12 @@ function ResultVisual() {
             <span className="font-mono text-xs font-medium">{value}</span>
           </div>
         ))}
+      </div>
+      <div className="mt-3 flex items-center gap-1.5 border-t border-border pt-2">
+        <span className="size-1.5 rounded-full bg-primary" />
+        <span className="font-mono text-[10px] text-muted-foreground">
+          Source: page 3 · 98% confidence
+        </span>
       </div>
     </div>
   );
@@ -94,7 +119,15 @@ const STEPS: StepData[] = [
 
 function Step({ step, reversed }: { step: StepData; reversed: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isActive = useInView(ref, { margin: "-45% 0px -45% 0px" });
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 85%", "start 45%"],
+  });
+  const progress = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  const [isActive, setIsActive] = useState(false);
+  useMotionValueEvent(progress, "change", (v) => setIsActive(v >= 0.98));
 
   const dotClass = `size-2 rounded-full transition-all duration-300 ${
     isActive ? "scale-125 bg-primary" : "bg-border"
@@ -153,9 +186,7 @@ export function HowItWorks() {
         </h2>
 
         <div ref={containerRef} className="relative">
-          {/* base line */}
           <div className="absolute left-[3px] top-2 bottom-2 w-px bg-border md:left-1/2 md:-translate-x-1/2" />
-          {/* filled line, grows with scroll */}
           <motion.div
             className="absolute left-[3px] top-2 w-px bg-primary md:left-1/2 md:-translate-x-1/2"
             style={{ height: lineHeight }}
