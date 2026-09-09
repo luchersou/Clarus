@@ -1,6 +1,6 @@
 "use client";
 
-import { Github } from "lucide-react";
+import { GithubIcon } from "@/components/icons/github-icon";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,7 +22,7 @@ export function OAuthButtons() {
         className="h-10 w-full gap-4 rounded-lg border-2 border-foreground/10!"
         onClick={() => handleOAuthLogin("github")}
       >
-        <Github className="h-4 w-4" />
+        <GithubIcon className="h-4 w-4" />
         Sign in with GitHub
       </Button>
       <Button
