@@ -3,6 +3,7 @@
 import { GithubIcon } from "@/components/icons/github-icon";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { GoogleIcon } from "../icons/google-icon";
 
 export function OAuthButtons() {
   const handleOAuthLogin = async (provider: "github" | "google") => {
@@ -31,7 +32,7 @@ export function OAuthButtons() {
         className="h-10 w-full gap-4 rounded-lg border-2 border-foreground/10!"
         onClick={() => handleOAuthLogin("google")}
       >
-        {/* svg do Google, igual já estava */}
+        <GoogleIcon className="h-4 w-4" />
         Sign in with Google
       </Button>
     </div>
