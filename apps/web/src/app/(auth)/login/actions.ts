@@ -10,6 +10,7 @@ export async function loginWithPassword(formData: FormData) {
 
   if (typeof email !== "string" || typeof password !== "string") {
     redirect("/login?error=invalid_credentials");
+    return;
   }
 
   const supabase = await createClient();
@@ -20,7 +21,8 @@ export async function loginWithPassword(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect("/login?error=invalid_credentials");
+    return;
   }
 
   redirect("/dashboard");
