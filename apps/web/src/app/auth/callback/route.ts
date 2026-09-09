@@ -1,24 +1,29 @@
-import { NextResponse } from "next/server";
+"use server";
+
+import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
+export async function loginWithPassword(formData: FormData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
 
-  if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+  if (typeof email !== "string" || typeof password !== "string") {
+    redirect("/login?error=invalid_credentials");
+    return;
   }
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
-    return NextResponse.redirect(
-      `${origin}/login?error=auth_callback_failed`,
-    );
+    redirect("/login?error=invalid_credentials");
+    return;
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`);
+  redirect("/dashboard");
 }
