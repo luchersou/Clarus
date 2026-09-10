@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DocumentUploadedEvent",
+  "type": "object",
+  "required": ["documentId", "userId", "storageUrl", "fileType"],
+  "properties": {
+    "documentId": { "type": "string", "format": "uuid" },
+    "userId": { "type": "string", "format": "uuid" },
+    "storageUrl": { "type": "string" },
+    "fileType": { "type": "string", "enum": ["PDF", "DOCX", "XLSX"] }
+  }
+}
