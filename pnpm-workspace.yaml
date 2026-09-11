@@ -3,6 +3,10 @@ packages:
   - 'packages/*'
 
 allowBuilds:
-  esbuild: set this to true or false
+  '@prisma/engines': true
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
   sharp: false
   unrs-resolver: false
+  workerd: true
