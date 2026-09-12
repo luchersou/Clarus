@@ -1,7 +1,7 @@
-import { InvalidDocumentTransitionError } from "./errors/invalid-document-transition.error.js";
+import { randomUUID } from "node:crypto";
 import type { DocumentStatus } from "./document-status.js";
-
-export type FileType = "PDF" | "DOCX" | "XLSX";
+import type { FileType } from "./file-type.js";
+import { InvalidDocumentTransitionError } from "./errors/invalid-document-transition.error.js";
 
 export interface DocumentProps {
   id: string;
@@ -19,7 +19,6 @@ export class Document {
   private constructor(private props: DocumentProps) {}
 
   static create(input: {
-    id: string;
     userId: string;
     fileName: string;
     fileType: FileType;
@@ -28,6 +27,7 @@ export class Document {
   }): Document {
     const now = new Date();
     return new Document({
+      id: randomUUID(),
       ...input,
       status: "UPLOADED",
       createdAt: now,
