@@ -20,7 +20,6 @@ export type FileType = (typeof FileType)[keyof typeof FileType]
 
 export const DocumentStatus = {
   UPLOADED: 'UPLOADED',
-  PROCESSING: 'PROCESSING',
   PROCESSED: 'PROCESSED',
   FAILED: 'FAILED'
 } as const

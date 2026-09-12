@@ -98,4 +98,7 @@ export class Document {
   get deletedAt() {
     return this.props.deletedAt;
   }
+  get isDeleted(): boolean {
+    return this.props.deletedAt !== null;
+  }
 }

@@ -23,6 +23,7 @@ model Document {
   status        DocumentStatus @default(UPLOADED)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
 
   @@schema("documents")
 }
@@ -37,7 +38,6 @@ enum FileType {
 
 enum DocumentStatus {
   UPLOADED
-  PROCESSING
   PROCESSED
   FAILED
 
