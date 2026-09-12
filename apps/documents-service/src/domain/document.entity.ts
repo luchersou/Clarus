@@ -39,18 +39,14 @@ export class Document {
     return new Document(props);
   }
 
-  markAsProcessing(): void {
-    if (this.props.status !== "UPLOADED") {
-      throw new InvalidDocumentTransitionError(this.props.status, "PROCESSING");
-    }
-    this.props.status = "PROCESSING";
-    this.props.updatedAt = new Date();
-  }
-
   markAsProcessed(): void {
-    if (this.props.status !== "UPLOADED" && this.props.status !== "PROCESSING") {
-      throw new InvalidDocumentTransitionError(this.props.status, "PROCESSED");
+    if (this.props.status !== "UPLOADED") {
+      throw new InvalidDocumentTransitionError(
+        this.props.status,
+        "PROCESSED",
+      );
     }
+
     this.props.status = "PROCESSED";
     this.props.updatedAt = new Date();
   }

@@ -1,1 +1,1 @@
-export type DocumentStatus = "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
+export type DocumentStatus = "UPLOADED" | "PROCESSED" | "FAILED";
