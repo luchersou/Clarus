@@ -16,6 +16,7 @@ export const ROUTING_KEYS = {
 export const QUEUES = {
   RAG_DOCUMENT_UPLOADED: "rag.document-uploaded",
   DOCUMENTS_DOCUMENT_EMBEDDED: "documents.document-embedded",
+  DOCUMENTS_DOCUMENT_EMBEDDING_FAILED: "documents.document-embedding-failed",
   RAG_ANALYSIS_REQUESTED: "rag.analysis-requested",
   ANALYSIS_ANALYSIS_COMPLETED: "analysis.analysis-completed",
 } as const;
