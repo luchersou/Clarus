@@ -1,0 +1,1 @@
+export type DocumentStatus = "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
