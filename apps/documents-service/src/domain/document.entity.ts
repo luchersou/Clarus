@@ -13,6 +13,7 @@ export interface DocumentProps {
   status: DocumentStatus;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export class Document {
@@ -32,6 +33,7 @@ export class Document {
       status: "UPLOADED",
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,
     });
   }
 
@@ -57,6 +59,13 @@ export class Document {
     }
     this.props.status = "FAILED";
     this.props.updatedAt = new Date();
+  }
+
+  delete(): void {
+    if (this.props.deletedAt) {
+      return; 
+    }
+    this.props.deletedAt = new Date();
   }
 
   get id() {
@@ -85,5 +94,8 @@ export class Document {
   }
   get updatedAt() {
     return this.props.updatedAt;
+  }
+  get deletedAt() {
+    return this.props.deletedAt;
   }
 }
