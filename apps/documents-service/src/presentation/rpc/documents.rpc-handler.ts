@@ -1,22 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, UseFilters } from "@nestjs/common";
 import { RabbitRPC } from "@golevelup/nestjs-rabbitmq";
 import { EXCHANGES, RPC_ROUTING_KEYS, RPC_QUEUES } from "@clarus/event-contracts";
 import { ListDocumentsUseCase } from "../../application/list-documents.use-case.js";
 import { GetDocumentUseCase } from "../../application/get-document.use-case.js";
 import { DeleteDocumentUseCase } from "../../application/delete-document.use-case.js";
+import { FILE_STORAGE, type FileStoragePort } from "../../application/ports/file-storage.port.js";
 import { DocumentResponseMapper } from "../document-response.mapper.js";
 import {
   ListDocumentsPayloadSchema,
   GetDocumentPayloadSchema,
   DeleteDocumentPayloadSchema,
-} from "../../application/dto/documents-rpc.dto.js";
+} from "../../application/dto/documents-rpc.dto.js"; 
+import { RpcExceptionFilter } from "../filters/rpc-exception.filter.js";
 
 @Injectable()
+@UseFilters(RpcExceptionFilter)
 export class DocumentsRpcHandler {
   constructor(
     private readonly listDocumentsUseCase: ListDocumentsUseCase,
     private readonly getDocumentUseCase: GetDocumentUseCase,
     private readonly deleteDocumentUseCase: DeleteDocumentUseCase,
+    @Inject(FILE_STORAGE) private readonly fileStorage: FileStoragePort,
   ) {}
 
   @RabbitRPC({
@@ -27,7 +31,16 @@ export class DocumentsRpcHandler {
   async list(payload: unknown) {
     const dto = ListDocumentsPayloadSchema.parse(payload);
     const documents = await this.listDocumentsUseCase.execute(dto);
-    return documents.map(DocumentResponseMapper.toHttp);
+
+    if (documents.length === 0) return [];
+
+    const urls = await this.fileStorage.getSignedUrls(
+      documents.map((doc) => doc.storageUrl),
+    );
+
+    return documents.map((doc) =>
+      DocumentResponseMapper.toHttp(doc, urls[doc.storageUrl]),
+    );
   }
 
   @RabbitRPC({
@@ -38,7 +51,8 @@ export class DocumentsRpcHandler {
   async getById(payload: unknown) {
     const dto = GetDocumentPayloadSchema.parse(payload);
     const document = await this.getDocumentUseCase.execute(dto);
-    return DocumentResponseMapper.toHttp(document);
+    const url = await this.fileStorage.getSignedUrl(document.storageUrl);
+    return DocumentResponseMapper.toHttp(document, url);
   }
 
   @RabbitRPC({

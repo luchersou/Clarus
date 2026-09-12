@@ -19,6 +19,7 @@ export interface UploadDocumentInput {
   fileName: string;
   fileType: FileType;
   file: Buffer;
+  contentType: string;
 }
 
 @Injectable()
@@ -35,7 +36,11 @@ export class UploadDocumentUseCase {
   async execute(input: UploadDocumentInput): Promise<Document> {
     const storageUrl = `${input.userId}/${Date.now()}-${input.fileName}`;
 
-    await this.fileStorage.upload({ path: storageUrl, file: input.file });
+    await this.fileStorage.upload({ 
+      path: storageUrl, 
+      file: input.file, 
+      contentType: input.contentType 
+    });
 
     const document = Document.create({
       userId: input.userId,
