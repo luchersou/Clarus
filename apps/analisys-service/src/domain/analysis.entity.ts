@@ -111,6 +111,9 @@ export class Analysis {
   get updatedAt() {
     return this.props.updatedAt;
   }
+  get deletedAt() {
+    return this.props.deletedAt;
+  }
 	get isDeleted(): boolean {
 		return this.props.deletedAt !== null;
 	}
