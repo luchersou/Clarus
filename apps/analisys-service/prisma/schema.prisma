@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["analysis"]
+}
+
+model Analysis {
+  id            String         @id @default(uuid())
+  documentId    String
+  userId        String
+  type          AnalysisType
+  status        AnalysisStatus @default(PENDING)
+  result        Json?
+  sourcePage    Int?
+  confidence    Float?
+  failureReason String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@index([documentId])
+  @@index([userId])
+  @@schema("analysis")
+}
+
+enum AnalysisType {
+  SUMMARY
+  EXTRACT_VALUES
+  DEADLINES
+  COMPARE
+
+  @@schema("analysis")
+}
+
+enum AnalysisStatus {
+  PENDING
+  COMPLETED
+  FAILED
+
+  @@schema("analysis")
+}

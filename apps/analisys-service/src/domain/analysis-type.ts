@@ -1,0 +1,1 @@
+export type AnalysisType = "SUMMARY" | "EXTRACT_VALUES" | "DEADLINES" | "COMPARE";

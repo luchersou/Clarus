@@ -1,0 +1,1 @@
+export type AnalysisStatus = "PENDING" | "COMPLETED" | "FAILED";

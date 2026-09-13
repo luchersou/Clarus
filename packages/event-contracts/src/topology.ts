@@ -19,6 +19,7 @@ export const QUEUES = {
   DOCUMENTS_DOCUMENT_EMBEDDING_FAILED: "documents.document-embedding-failed",
   RAG_ANALYSIS_REQUESTED: "rag.analysis-requested",
   ANALYSIS_ANALYSIS_COMPLETED: "analysis.analysis-completed",
+  ANALYSIS_ANALYSIS_FAILED: "analysis.analysis-failed",
 } as const;
 
 export const RPC_ROUTING_KEYS = {
@@ -26,8 +27,9 @@ export const RPC_ROUTING_KEYS = {
   DOCUMENTS_GET_BY_ID: "documents.get-by-id",
   DOCUMENTS_DELETE: "documents.delete",
   ANALYSES_REQUEST: "analyses.request",
-  ANALYSES_LIST_BY_DOCUMENT: "analyses.list-by-document",
+  ANALYSES_LIST: "analyses.list",
   ANALYSES_GET_BY_ID: "analyses.get-by-id",
+  ANALYSES_DELETE: "analyses.delete",
 } as const;
 
 export const RPC_QUEUES = {
@@ -35,6 +37,7 @@ export const RPC_QUEUES = {
   DOCUMENTS_GET_BY_ID: "documents.rpc.get-by-id",
   DOCUMENTS_DELETE: "documents.rpc.delete",
   ANALYSES_REQUEST: "analyses.rpc.request",
-  ANALYSES_LIST_BY_DOCUMENT: "analyses.rpc.list-by-document",
+  ANALYSES_LIST: "analyses.rpc.list",
   ANALYSES_GET_BY_ID: "analyses.rpc.get-by-id",
+  ANALYSES_DELETE: "analyses.rpc.delete",
 } as const;
