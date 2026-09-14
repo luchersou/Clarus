@@ -10,6 +10,8 @@ apps/**/.next/
 apps/**/dist/
 apps/**/build/
 
+packages/*/dist/
+
 # Variáveis de ambiente (nunca versionar valores reais)
 apps/**/.env
 apps/**/.env.local

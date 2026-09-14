@@ -22,6 +22,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
+    "@clarus/event-contracts": "workspace:*",
     "@golevelup/nestjs-rabbitmq": "^9.0.2",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.0",

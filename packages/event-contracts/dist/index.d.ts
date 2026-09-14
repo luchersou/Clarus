@@ -19,22 +19,25 @@ declare const QUEUES: {
     readonly DOCUMENTS_DOCUMENT_EMBEDDING_FAILED: "documents.document-embedding-failed";
     readonly RAG_ANALYSIS_REQUESTED: "rag.analysis-requested";
     readonly ANALYSIS_ANALYSIS_COMPLETED: "analysis.analysis-completed";
+    readonly ANALYSIS_ANALYSIS_FAILED: "analysis.analysis-failed";
 };
 declare const RPC_ROUTING_KEYS: {
     readonly DOCUMENTS_LIST: "documents.list";
     readonly DOCUMENTS_GET_BY_ID: "documents.get-by-id";
     readonly DOCUMENTS_DELETE: "documents.delete";
     readonly ANALYSES_REQUEST: "analyses.request";
-    readonly ANALYSES_LIST_BY_DOCUMENT: "analyses.list-by-document";
+    readonly ANALYSES_LIST: "analyses.list";
     readonly ANALYSES_GET_BY_ID: "analyses.get-by-id";
+    readonly ANALYSES_DELETE: "analyses.delete";
 };
 declare const RPC_QUEUES: {
     readonly DOCUMENTS_LIST: "documents.rpc.list";
     readonly DOCUMENTS_GET_BY_ID: "documents.rpc.get-by-id";
     readonly DOCUMENTS_DELETE: "documents.rpc.delete";
     readonly ANALYSES_REQUEST: "analyses.rpc.request";
-    readonly ANALYSES_LIST_BY_DOCUMENT: "analyses.rpc.list-by-document";
+    readonly ANALYSES_LIST: "analyses.rpc.list";
     readonly ANALYSES_GET_BY_ID: "analyses.rpc.get-by-id";
+    readonly ANALYSES_DELETE: "analyses.rpc.delete";
 };
 
 declare const DocumentUploadedSchema: z.ZodObject<{
