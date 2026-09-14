@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "./prisma.service.js";
 import { Analysis } from "../../domain/analysis.entity.js";
 import type { AnalysisRepository } from "../../domain/analysis.repository.js";
-import { Prisma } from "../../../prisma/generated/prisma/client.js";
-import type { Analysis as PrismaAnalysis } from "../../../prisma/generated/prisma/client.js"; 
+import { Prisma } from "./generated/prisma/client.js";
+import type { Analysis as PrismaAnalysis } from "./generated/prisma/client.js"; 
 
 @Injectable()
 export class AnalysisPrismaRepository implements AnalysisRepository {

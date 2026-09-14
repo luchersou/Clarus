@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Document } from "../../domain/document.entity.js";
 import type { DocumentRepository } from "../../domain/document.repository.js";
 import { PrismaService } from "./prisma.service.js";
-import type { Document as PrismaDocument } from "../../../prisma/generated/prisma/client.js";
+import type { Document as PrismaDocument } from "./generated/prisma/client.js";
 
 @Injectable()
 export class DocumentPrismaRepository implements DocumentRepository {

@@ -207,7 +207,7 @@ importers:
 
   .: {}
 
-  apps/analisys-service:
+  apps/analysis-service:
     dependencies:
       '@clarus/event-contracts':
         specifier: workspace:*
