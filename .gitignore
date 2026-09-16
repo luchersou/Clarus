@@ -19,9 +19,9 @@ apps/**/.env.*.local
 !apps/**/.env.example
 
 # Python
-apps/rag-service/venv/
-apps/rag-service/__pycache__/
-apps/rag-service/*.pyc
+.venv/
+__pycache__/
+*.pyc
 
 # Logs
 *.log
