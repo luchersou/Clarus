@@ -51,3 +51,18 @@ class ChatMessage(Base):
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
     session: Mapped["ChatSession"] = relationship(back_populates="messages")
+
+    @staticmethod
+    def create(
+        session_id: uuid.UUID,
+        role: Literal["user", "assistant"],
+        content: str,
+        sources: dict | None = None,
+    ) -> "ChatMessage":
+        return ChatMessage(
+            id=uuid.uuid4(),
+            session_id=session_id,
+            role=role,
+            content=content,
+            sources=sources,
+        )
