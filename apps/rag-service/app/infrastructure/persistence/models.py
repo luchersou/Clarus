@@ -36,6 +36,14 @@ class ChatSession(Base):
 
     messages: Mapped[list["ChatMessage"]] = relationship(back_populates="session")
 
+    @staticmethod
+    def create(user_id: uuid.UUID, document_id: uuid.UUID | None = None) -> "ChatSession":
+        return ChatSession(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            document_id=document_id,
+        )
+
 
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
