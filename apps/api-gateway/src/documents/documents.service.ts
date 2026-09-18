@@ -1,0 +1,70 @@
+import { Injectable } from "@nestjs/common";
+import { HttpService } from "@nestjs/axios";
+import { firstValueFrom } from "rxjs";
+import FormData from "form-data";
+import { RPC_ROUTING_KEYS } from "@clarus/event-contracts";
+import { RpcClientService } from "../shared/rpc-client.service.js";
+import { mapRpcResponse, mapInfrastructureError } from "../shared/rpc-error.mapper.js";
+
+@Injectable()
+export class DocumentsService {
+  private readonly documentsServiceUrl = process.env.DOCUMENTS_SERVICE_URL!;
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly rpcClient: RpcClientService,
+  ) {}
+
+  async upload(userId: string, file: Express.Multer.File): Promise<unknown> {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("file", file.buffer, file.originalname);
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`${this.documentsServiceUrl}/documents`, formData, {
+          headers: formData.getHeaders(),
+          timeout: 30000,
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      mapInfrastructureError(error);
+    }
+  }
+
+  async list(userId: string): Promise<unknown> {
+    try {
+      const response = await this.rpcClient.request(RPC_ROUTING_KEYS.DOCUMENTS_LIST, {
+        userId,
+      });
+      return mapRpcResponse(response);
+    } catch (error) {
+      mapInfrastructureError(error);
+    }
+  }
+
+  async getById(documentId: string, userId: string): Promise<unknown> {
+    try {
+      const response = await this.rpcClient.request(RPC_ROUTING_KEYS.DOCUMENTS_GET_BY_ID, {
+        documentId,
+        userId,
+      });
+      return mapRpcResponse(response);
+    } catch (error) {
+      mapInfrastructureError(error);
+    }
+  }
+
+  async delete(documentId: string, userId: string): Promise<unknown> {
+    try {
+      const response = await this.rpcClient.request(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, {
+        documentId,
+        userId,
+      });
+      return mapRpcResponse(response);
+    } catch (error) {
+      mapInfrastructureError(error);
+    }
+  }
+}

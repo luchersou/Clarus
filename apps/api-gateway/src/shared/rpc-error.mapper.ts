@@ -27,8 +27,8 @@ export function mapRpcResponse<T>(response: T | RpcErrorResponse): T {
   return response;
 }
 
-export function mapRpcError(error: unknown): never {
-  logger.error("RPC call failed", error instanceof Error ? error.stack : error);
+export function mapInfrastructureError(error: unknown): never {
+  logger.error("Infrastructure call failed", error instanceof Error ? error.stack : error);
 
   throw new ServiceUnavailableException(
     "The service is temporarily unavailable. Please try again later.",
