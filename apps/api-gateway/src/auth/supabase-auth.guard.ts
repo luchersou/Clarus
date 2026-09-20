@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Request } from "express";
 
@@ -20,15 +21,17 @@ export interface AuthenticatedRequest extends Request {
 export class SupabaseAuthGuard implements CanActivate {
   private readonly supabase: SupabaseClient;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+      this.configService.getOrThrow<string>("SUPABASE_URL"),
+      this.configService.getOrThrow<string>("SUPABASE_ANON_KEY"),
+    );    
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const request =
+      context.switchToHttp().getRequest<AuthenticatedRequest>();
+
     const token = this.extractToken(request);
 
     if (!token) {
@@ -51,9 +54,11 @@ export class SupabaseAuthGuard implements CanActivate {
 
   private extractToken(request: Request): string | null {
     const authHeader = request.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return null;
     }
+
     return authHeader.substring(7);
   }
 }
