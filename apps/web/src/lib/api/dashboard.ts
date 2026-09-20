@@ -10,14 +10,6 @@ export const getDashboardSummary = cache(async () => {
   });
 
   if (!res.ok) {
-    const body = await res.text();
-
-    console.error("Dashboard API error:", {
-      status: res.status,
-      statusText: res.statusText,
-      body,
-    });
-
     throw new Error(
       `Failed to fetch dashboard summary: ${res.status} ${res.statusText}`,
     );
