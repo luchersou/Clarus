@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "pnpm install && cd apps/rag-service && uv sync",
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:api\" \"pnpm dev:documents\" \"pnpm dev:analysis\" \"pnpm dev:rag\"",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api-gateway start",
+    "dev:documents": "pnpm --filter documents-service start",
+    "dev:analysis": "pnpm --filter analysis-service start",
+    "dev:rag": "cd apps/rag-service && uv run uvicorn app.main:app --reload --port 3004"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +23,8 @@
     }
   },
   "packageManager": "pnpm@11.23.0",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
 }
