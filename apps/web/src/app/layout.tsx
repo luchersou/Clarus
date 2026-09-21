@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Tomorrow, Geist_Mono } from "next/font/google";
+import { Tomorrow, Geist_Mono, Geist } from "next/font/google";
 import "./globals.css";
 
 const tomorrow = Tomorrow({
   variable: "--font-tomorrow",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"], 
+});
+
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -22,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${tomorrow.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${tomorrow.variable} ${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background">{children}</body>
     </html>

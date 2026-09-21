@@ -15,23 +15,25 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-	// Middleware protects the route before rendering.
-	// This check provides a second layer of protection at the layout level.
+  // Middleware protects the route before rendering.
+  // This check provides a second layer of protection at the layout level.
   if (!user) {
     redirect("/login");
   }
 
   return (
-    <TooltipProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <SiteHeader />
-          <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-            {children}
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
+    <div style={{ fontFamily: "var(--font-geist)" }}>
+      <TooltipProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <SiteHeader />
+            <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
+    </div>
   );
 }

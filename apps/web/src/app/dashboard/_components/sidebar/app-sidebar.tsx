@@ -40,7 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenuItem>
           <SidebarMenuButton className="hover:text-foreground h-10 group-data-[collapsible=icon]:px-0! cursor-default hover:bg-transparent">
             <Logo />
-            <span className="text-foreground font-semibold">Tio Dog Barbearia</span>
+            <span className="text-foreground font-semibold">Clarus</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

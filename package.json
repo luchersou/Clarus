@@ -4,8 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "setup": "pnpm install && cd apps/rag-service && uv sync",
+    "setup": "pnpm install && pnpm db:setup && cd apps/rag-service && uv sync",
+    "db:setup": "pnpm db:migrate:documents && pnpm db:migrate:analysis",
+    "db:migrate:documents": "pnpm --dir apps/documents-service exec prisma migrate deploy",
+    "db:migrate:analysis": "pnpm --dir apps/analysis-service exec prisma migrate deploy",
+
     "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:api\" \"pnpm dev:documents\" \"pnpm dev:analysis\" \"pnpm dev:rag\"",
+
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api-gateway start",
     "dev:documents": "pnpm --filter documents-service start",
