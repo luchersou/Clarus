@@ -12,19 +12,27 @@ import { GetAnalysisUseCase } from "./application/get-analysis.use-case.js";
 import { DeleteAnalysisUseCase } from "./application/delete-analysis.use-case.js";
 import { MarkAnalysisCompletedUseCase } from "./application/mark-analysis-completed.use-case.js";
 import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.use-case.js";
+import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
+import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
 
 @Module({
   imports: [PrismaModule, MessagingModule],
+
   providers: [
     { provide: ANALYSIS_REPOSITORY, useClass: AnalysisPrismaRepository },
     { provide: ANALYSIS_EVENT_PUBLISHER, useClass: AnalysisEventPublisher },
+
     RequestAnalysisUseCase,
     ListAnalysesUseCase,
     GetAnalysisUseCase,
     DeleteAnalysisUseCase,
     MarkAnalysisCompletedUseCase,
     MarkAnalysisFailedUseCase,
+
     AnalysesRpcHandler,
+
+    AnalysisCompletedListener,
+    AnalysisFailedListener,
   ],
 })
 export class AnalysesModule {}
