@@ -28,7 +28,15 @@ export function mapRpcResponse<T>(response: T | RpcErrorResponse): T {
 }
 
 export function mapInfrastructureError(error: unknown): never {
-  logger.error("Infrastructure call failed", error instanceof Error ? error.stack : error);
+  if (error && typeof error === "object" && "response" in error) {
+    const axiosError = error as { response?: { data?: unknown; status?: number } };
+    logger.error(
+      `RPC call failed with status ${axiosError.response?.status}`,
+      JSON.stringify(axiosError.response?.data),
+    );
+  } else {
+    logger.error("RPC call failed", error instanceof Error ? error.stack : error);
+  }
 
   throw new ServiceUnavailableException(
     "The service is temporarily unavailable. Please try again later.",

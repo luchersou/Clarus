@@ -4,6 +4,13 @@ import type { FileStoragePort } from "../../application/ports/file-storage.port.
 
 const BUCKET_NAME = "documents";
 
+function sanitizeFileName(fileName: string): string {
+  return fileName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9.\-_]/g, "_");
+}
+
 @Injectable()
 export class SupabaseStorageService implements FileStoragePort {
   private readonly client: SupabaseClient;
@@ -20,9 +27,11 @@ export class SupabaseStorageService implements FileStoragePort {
     file: Buffer;
     contentType: string;
   }): Promise<void> {
+    const safePath = sanitizeFileName(params.path);
+    
     const { error } = await this.client.storage
       .from(BUCKET_NAME)
-      .upload(params.path, params.file, {
+      .upload(safePath, params.file, {
         contentType: params.contentType,
         upsert: false,
       });

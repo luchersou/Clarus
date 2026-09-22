@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import FormData from "form-data";
@@ -18,6 +18,8 @@ export class DocumentsService {
   async upload(userId: string, file: Express.Multer.File): Promise<unknown> {
     const formData = new FormData();
     formData.append("userId", userId);
+    formData.append("fileName", file.originalname);
+    formData.append("fileType", this.mapFileType(file.mimetype));
     formData.append("file", file.buffer, file.originalname);
 
     try {
@@ -66,5 +68,20 @@ export class DocumentsService {
     } catch (error) {
       mapInfrastructureError(error);
     }
+  }
+
+  private mapFileType(mimetype: string): string {
+    const map: Record<string, string> = {
+      "application/pdf": "PDF",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "DOCX",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
+    };
+
+    const fileType = map[mimetype];
+    if (!fileType) {
+      throw new BadRequestException(`Unsupported file type: ${mimetype}`);
+    }
+
+    return fileType;
   }
 }
