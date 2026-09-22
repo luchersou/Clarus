@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useEffect } from "react";
 
-import Logo from "@/app/dashboard/_components/logo";
+import Logo from "@/app/dashboard/_components/sidebar/logo";
 import { NavMain } from "@/app/dashboard/_components/sidebar/nav-main";
 import { NavUser } from "@/app/dashboard/_components/sidebar/nav-user";
 import { ScrollArea } from "@/components/ui/scroll-area";
