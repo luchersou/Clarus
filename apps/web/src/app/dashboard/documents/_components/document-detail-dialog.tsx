@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { requestAnalysis } from "@/lib/actions/analyses";
+import { getDocumentByIdAction } from "../actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,11 +65,7 @@ export function DocumentDetailDialog({
     }
 
     setIsLoading(true);
-    fetch(`/api/documents/${documentId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch document");
-        return res.json();
-      })
+    getDocumentByIdAction(documentId)
       .then(setDocument)
       .catch(() => setError("Unable to load document details."))
       .finally(() => setIsLoading(false));
@@ -95,7 +92,7 @@ export function DocumentDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         {isLoading || !document ? (
           <div className="flex h-40 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
