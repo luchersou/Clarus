@@ -1,5 +1,5 @@
 export interface FileStoragePort {
-  upload(params: { path: string; file: Buffer; contentType: string }): Promise<void>;
+  upload(params: { path: string; file: Buffer; contentType: string }): Promise<{ path: string }>;
   getSignedUrl(path: string, expiresInSeconds?: number): Promise<string>;
   getSignedUrls(paths: string[], expiresInSeconds?: number): Promise<Record<string, string>>;
   delete(path: string): Promise<void>;

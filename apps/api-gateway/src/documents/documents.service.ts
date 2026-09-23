@@ -16,11 +16,13 @@ export class DocumentsService {
   ) {}
 
   async upload(userId: string, file: Express.Multer.File): Promise<unknown> {
+    const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
+
     const formData = new FormData();
     formData.append("userId", userId);
-    formData.append("fileName", file.originalname);
+    formData.append("fileName", fileName);
     formData.append("fileType", this.mapFileType(file.mimetype));
-    formData.append("file", file.buffer, file.originalname);
+    formData.append("file", file.buffer, fileName);
 
     try {
       const response = await firstValueFrom(

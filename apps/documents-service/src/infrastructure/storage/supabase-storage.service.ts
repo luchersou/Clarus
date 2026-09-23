@@ -26,7 +26,7 @@ export class SupabaseStorageService implements FileStoragePort {
     path: string;
     file: Buffer;
     contentType: string;
-  }): Promise<void> {
+  }): Promise<{ path: string }> {
     const safePath = sanitizeFileName(params.path);
     
     const { error } = await this.client.storage
@@ -39,6 +39,8 @@ export class SupabaseStorageService implements FileStoragePort {
     if (error) {
       throw new Error(`Failed to upload file to Supabase Storage: ${error.message}`);
     }
+
+    return { path: safePath };
   }
 
   async getSignedUrl(path: string, expiresInSeconds = 3600): Promise<string> {

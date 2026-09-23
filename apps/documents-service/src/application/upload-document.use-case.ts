@@ -36,10 +36,10 @@ export class UploadDocumentUseCase {
   async execute(input: UploadDocumentInput): Promise<Document> {
     const storageUrl = `${input.userId}/${Date.now()}-${input.fileName}`;
 
-    await this.fileStorage.upload({ 
-      path: storageUrl, 
-      file: input.file, 
-      contentType: input.contentType 
+    const { path: safeStorageUrl } = await this.fileStorage.upload({
+      path: storageUrl,
+      file: input.file,
+      contentType: input.contentType,
     });
 
     const document = Document.create({
@@ -47,7 +47,7 @@ export class UploadDocumentUseCase {
       fileName: input.fileName,
       fileType: input.fileType,
       fileSizeBytes: input.file.length,
-      storageUrl,
+      storageUrl: safeStorageUrl,
     });
 
     await this.documentRepository.save(document);
