@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { authHeaders } from "@/lib/api/auth-headers";
+import { getAnalyses } from "../api/analyses";
 
 const API_URL = process.env.API_GATEWAY_URL!;
 
@@ -34,4 +35,8 @@ export async function deleteAnalysis(id: string) {
   }
 
   revalidatePath("/dashboard/analyses");
+}
+
+export async function getAnalysesAction(documentId?: string) {
+  return getAnalyses(documentId);
 }
