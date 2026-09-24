@@ -24,8 +24,13 @@ export default async function DashboardLayout({
   return (
     <div style={{ fontFamily: "var(--font-geist)" }}>
       <TooltipProvider>
-        <SidebarProvider>
-          <AppSidebar />
+        <SidebarProvider
+          style={{
+            "--sidebar-width": "calc(var(--spacing) * 64)",
+            "--header-height": "calc(var(--spacing) * 14)",
+          } as React.CSSProperties}
+        >
+          <AppSidebar variant="inset"/>
           <SidebarInset>
             <SiteHeader />
             <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
