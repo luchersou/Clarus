@@ -6,6 +6,7 @@ import {
   FileTextIcon,
   HomeIcon,
   MessageSquareIcon,
+  SettingsIcon,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -76,6 +77,11 @@ export const navItems: NavGroup[] = [
         title: "Chat",
         href: "/dashboard/chat",
         icon: MessageSquareIcon,
+      },
+      {
+        title: "Settings",
+        href: "/dashboard/settings",
+        icon: SettingsIcon,
       },
     ],
   },
