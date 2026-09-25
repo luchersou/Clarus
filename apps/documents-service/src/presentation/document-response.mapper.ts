@@ -8,6 +8,7 @@ export class DocumentResponseMapper {
       fileName: document.fileName,
       fileType: document.fileType,
       status: document.status,
+      failureReason: document.failureReason,
       createdAt: document.createdAt,
       url,
     };

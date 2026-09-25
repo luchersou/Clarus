@@ -42,6 +42,7 @@ export type DocumentMinAggregateOutputType = {
   fileSizeBytes: number | null
   storageUrl: string | null
   status: $Enums.DocumentStatus | null
+  failureReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -55,6 +56,7 @@ export type DocumentMaxAggregateOutputType = {
   fileSizeBytes: number | null
   storageUrl: string | null
   status: $Enums.DocumentStatus | null
+  failureReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -68,6 +70,7 @@ export type DocumentCountAggregateOutputType = {
   fileSizeBytes: number
   storageUrl: number
   status: number
+  failureReason: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -91,6 +94,7 @@ export type DocumentMinAggregateInputType = {
   fileSizeBytes?: true
   storageUrl?: true
   status?: true
+  failureReason?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -104,6 +108,7 @@ export type DocumentMaxAggregateInputType = {
   fileSizeBytes?: true
   storageUrl?: true
   status?: true
+  failureReason?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -117,6 +122,7 @@ export type DocumentCountAggregateInputType = {
   fileSizeBytes?: true
   storageUrl?: true
   status?: true
+  failureReason?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -217,6 +223,7 @@ export type DocumentGroupByOutputType = {
   fileSizeBytes: number
   storageUrl: string
   status: $Enums.DocumentStatus
+  failureReason: string | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -253,6 +260,7 @@ export type DocumentWhereInput = {
   fileSizeBytes?: Prisma.IntFilter<"Document"> | number
   storageUrl?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.EnumDocumentStatusFilter<"Document"> | $Enums.DocumentStatus
+  failureReason?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
@@ -266,6 +274,7 @@ export type DocumentOrderByWithRelationInput = {
   fileSizeBytes?: Prisma.SortOrder
   storageUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -282,6 +291,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   fileSizeBytes?: Prisma.IntFilter<"Document"> | number
   storageUrl?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.EnumDocumentStatusFilter<"Document"> | $Enums.DocumentStatus
+  failureReason?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
@@ -295,6 +305,7 @@ export type DocumentOrderByWithAggregationInput = {
   fileSizeBytes?: Prisma.SortOrder
   storageUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,6 +327,7 @@ export type DocumentScalarWhereWithAggregatesInput = {
   fileSizeBytes?: Prisma.IntWithAggregatesFilter<"Document"> | number
   storageUrl?: Prisma.StringWithAggregatesFilter<"Document"> | string
   status?: Prisma.EnumDocumentStatusWithAggregatesFilter<"Document"> | $Enums.DocumentStatus
+  failureReason?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
@@ -329,6 +341,7 @@ export type DocumentCreateInput = {
   fileSizeBytes: number
   storageUrl: string
   status?: $Enums.DocumentStatus
+  failureReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -342,6 +355,7 @@ export type DocumentUncheckedCreateInput = {
   fileSizeBytes: number
   storageUrl: string
   status?: $Enums.DocumentStatus
+  failureReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -355,6 +369,7 @@ export type DocumentUpdateInput = {
   fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   storageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -368,6 +383,7 @@ export type DocumentUncheckedUpdateInput = {
   fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   storageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -381,6 +397,7 @@ export type DocumentCreateManyInput = {
   fileSizeBytes: number
   storageUrl: string
   status?: $Enums.DocumentStatus
+  failureReason?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -394,6 +411,7 @@ export type DocumentUpdateManyMutationInput = {
   fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   storageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -407,6 +425,7 @@ export type DocumentUncheckedUpdateManyInput = {
   fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   storageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+  failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -420,6 +439,7 @@ export type DocumentCountOrderByAggregateInput = {
   fileSizeBytes?: Prisma.SortOrder
   storageUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  failureReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -437,6 +457,7 @@ export type DocumentMaxOrderByAggregateInput = {
   fileSizeBytes?: Prisma.SortOrder
   storageUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  failureReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -450,6 +471,7 @@ export type DocumentMinOrderByAggregateInput = {
   fileSizeBytes?: Prisma.SortOrder
   storageUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  failureReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -479,6 +501,10 @@ export type EnumDocumentStatusFieldUpdateOperationsInput = {
   set?: $Enums.DocumentStatus
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
@@ -497,6 +523,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   fileSizeBytes?: boolean
   storageUrl?: boolean
   status?: boolean
+  failureReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -510,6 +537,7 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   fileSizeBytes?: boolean
   storageUrl?: boolean
   status?: boolean
+  failureReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -523,6 +551,7 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   fileSizeBytes?: boolean
   storageUrl?: boolean
   status?: boolean
+  failureReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -536,12 +565,13 @@ export type DocumentSelectScalar = {
   fileSizeBytes?: boolean
   storageUrl?: boolean
   status?: boolean
+  failureReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fileName" | "fileType" | "fileSizeBytes" | "storageUrl" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fileName" | "fileType" | "fileSizeBytes" | "storageUrl" | "status" | "failureReason" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["document"]>
 
 export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Document"
@@ -554,6 +584,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     fileSizeBytes: number
     storageUrl: string
     status: $Enums.DocumentStatus
+    failureReason: string | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -987,6 +1018,7 @@ export interface DocumentFieldRefs {
   readonly fileSizeBytes: Prisma.FieldRef<"Document", 'Int'>
   readonly storageUrl: Prisma.FieldRef<"Document", 'String'>
   readonly status: Prisma.FieldRef<"Document", 'DocumentStatus'>
+  readonly failureReason: Prisma.FieldRef<"Document", 'String'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Document", 'DateTime'>

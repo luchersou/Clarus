@@ -24,7 +24,7 @@ export class MarkDocumentFailedUseCase {
       return;
     }
 
-    document.markAsFailed();
+    document.markAsFailed(input.reason);
     await this.documentRepository.save(document);
   }
 }

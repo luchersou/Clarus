@@ -78,6 +78,7 @@ export const DocumentScalarFieldEnum = {
   fileSizeBytes: 'fileSizeBytes',
   storageUrl: 'storageUrl',
   status: 'status',
+  failureReason: 'failureReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'

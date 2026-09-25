@@ -11,6 +11,7 @@ export interface DocumentProps {
   fileSizeBytes: number;
   storageUrl: string;
   status: DocumentStatus;
+  failureReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -31,6 +32,7 @@ export class Document {
       id: randomUUID(),
       ...input,
       status: "UPLOADED",
+      failureReason: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -50,14 +52,16 @@ export class Document {
     }
 
     this.props.status = "PROCESSED";
+    this.props.failureReason = null;
     this.props.updatedAt = new Date();
   }
 
-  markAsFailed(): void {
+  markAsFailed(reason: string): void {
     if (this.props.status === "PROCESSED") {
       throw new InvalidDocumentTransitionError(this.props.status, "FAILED");
     }
     this.props.status = "FAILED";
+    this.props.failureReason = reason;
     this.props.updatedAt = new Date();
   }
 
@@ -88,6 +92,9 @@ export class Document {
   }
   get status() {
     return this.props.status;
+  }
+  get failureReason() { 
+    return this.props.failureReason; 
   }
   get createdAt() {
     return this.props.createdAt;
