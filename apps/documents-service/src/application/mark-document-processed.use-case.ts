@@ -1,8 +1,5 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import {
-  DOCUMENT_REPOSITORY,
-  type DocumentRepository,
-} from "../domain/document.repository.js";
+import { Inject, Injectable } from "@nestjs/common";
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from "../domain/document.repository.js";
 
 export interface MarkDocumentProcessedInput {
   documentId: string;
@@ -19,7 +16,7 @@ export class MarkDocumentProcessedUseCase {
     const document = await this.documentRepository.findById(input.documentId);
 
     if (!document) {
-      throw new NotFoundException(`Document ${input.documentId} not found`);
+      return;
     }
 
     document.markAsProcessed();

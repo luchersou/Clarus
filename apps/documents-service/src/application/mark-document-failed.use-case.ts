@@ -1,8 +1,5 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import {
-  DOCUMENT_REPOSITORY,
-  type DocumentRepository,
-} from "../domain/document.repository.js";
+import { Inject, Injectable } from "@nestjs/common";
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from "../domain/document.repository.js";
 
 export interface MarkDocumentFailedInput {
   documentId: string;
@@ -20,7 +17,11 @@ export class MarkDocumentFailedUseCase {
     const document = await this.documentRepository.findById(input.documentId);
 
     if (!document) {
-      throw new NotFoundException(`Document ${input.documentId} not found`);
+      // Document was deleted before the rag-service responded — this is an
+      // expected race condition in a choreographed saga, not an error.
+      // Silently ignore rather than throwing, since there's no caller waiting
+      // on this listener to report back to.
+      return;
     }
 
     document.markAsFailed();
