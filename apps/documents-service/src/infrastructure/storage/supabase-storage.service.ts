@@ -27,8 +27,11 @@ export class SupabaseStorageService implements FileStoragePort {
     file: Buffer;
     contentType: string;
   }): Promise<{ path: string }> {
-    const safePath = sanitizeFileName(params.path);
-    
+    const lastSlashIndex = params.path.lastIndexOf("/");
+    const folder = params.path.slice(0, lastSlashIndex);
+    const fileName = params.path.slice(lastSlashIndex + 1);
+    const safePath = `${folder}/${sanitizeFileName(fileName)}`;
+
     const { error } = await this.client.storage
       .from(BUCKET_NAME)
       .upload(safePath, params.file, {
