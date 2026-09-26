@@ -4,14 +4,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field, confloat, conint
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AnalysisCompletedEvent(BaseModel):
-    analysis_id: UUID = Field(..., alias='analysisId')
+    model_config = ConfigDict(populate_by_name=True)
+
+    analysis_id: UUID = Field(..., alias="analysisId")
     result: dict[str, Any]
-    source_page: conint(ge=0) | None = Field(None, alias='sourcePage')
-    confidence: confloat(ge=0.0, le=1.0) | None = None
+    source_page: Annotated[int, Field(ge=0)] | None = Field(None, alias="sourcePage")
+    confidence: Annotated[float, Field(ge=0.0, le=1.0)] | None = None

@@ -20,6 +20,6 @@ async def handle_document_uploaded(message: AbstractIncomingMessage) -> None:
                 document_id=event.document_id,
                 user_id=event.user_id,
                 storage_path=event.storage_url,
-                file_type=event.file_type,
+                file_type=event.file_type.value,
                 repository=repository,
             )

@@ -7,18 +7,20 @@ from __future__ import annotations
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Type(Enum):
-    summary = 'SUMMARY'
-    extract_values = 'EXTRACT_VALUES'
-    deadlines = 'DEADLINES'
-    compare = 'COMPARE'
+    summary = "SUMMARY"
+    extract_values = "EXTRACT_VALUES"
+    deadlines = "DEADLINES"
+    compare = "COMPARE"
 
 
 class AnalysisRequestedEvent(BaseModel):
-    analysis_id: UUID = Field(..., alias='analysisId')
-    document_id: UUID = Field(..., alias='documentId')
-    user_id: UUID = Field(..., alias='userId')
+    model_config = ConfigDict(populate_by_name=True)
+
+    analysis_id: UUID = Field(..., alias="analysisId")
+    document_id: UUID = Field(..., alias="documentId")
+    user_id: UUID = Field(..., alias="userId")
     type: Type

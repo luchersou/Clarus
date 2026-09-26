@@ -7,17 +7,19 @@ from __future__ import annotations
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FileType(Enum):
-    pdf = 'PDF'
-    docx = 'DOCX'
-    xlsx = 'XLSX'
+    pdf = "PDF"
+    docx = "DOCX"
+    xlsx = "XLSX"
 
 
 class DocumentUploadedEvent(BaseModel):
-    document_id: UUID = Field(..., alias='documentId')
-    user_id: UUID = Field(..., alias='userId')
-    storage_url: str = Field(..., alias='storageUrl')
-    file_type: FileType = Field(..., alias='fileType')
+    model_config = ConfigDict(populate_by_name=True)
+
+    document_id: UUID = Field(..., alias="documentId")
+    user_id: UUID = Field(..., alias="userId")
+    storage_url: str = Field(..., alias="storageUrl")
+    file_type: FileType = Field(..., alias="fileType")

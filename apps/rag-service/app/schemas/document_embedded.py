@@ -4,11 +4,14 @@
 
 from __future__ import annotations
 
+from typing import Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentEmbeddedEvent(BaseModel):
-    document_id: UUID = Field(..., alias='documentId')
-    chunks_count: conint(ge=1) = Field(..., alias='chunksCount')
+    model_config = ConfigDict(populate_by_name=True)
+
+    document_id: UUID = Field(..., alias="documentId")
+    chunks_count: Annotated[int, Field(ge=1)] = Field(..., alias="chunksCount")

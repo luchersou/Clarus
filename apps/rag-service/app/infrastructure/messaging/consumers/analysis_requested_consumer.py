@@ -19,6 +19,6 @@ async def handle_analysis_requested(message: AbstractIncomingMessage) -> None:
                 analysis_id=event.analysis_id,
                 document_id=event.document_id,
                 user_id=event.user_id,
-                analysis_type=event.type,
+                analysis_type=event.type.value,
                 repository=repository,
             )
