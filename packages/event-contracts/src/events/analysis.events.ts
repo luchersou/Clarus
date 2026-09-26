@@ -14,9 +14,9 @@ export type AnalysisRequestedEvent = z.infer<typeof AnalysisRequestedSchema>;
 // Consumed by: analises-service
 export const AnalysisCompletedSchema = z.object({
   analysisId: z.string().uuid(),
-  result: z.record(z.string(), z.unknown()), 
-  sourcePage: z.number().int().optional(),
-  confidence: z.number().min(0).max(1).optional(),
+  result: z.record(z.string(), z.unknown()),
+  sourcePage: z.number().int().optional().nullable(),
+  confidence: z.number().min(0).max(1).optional().nullable(),
 });
 export type AnalysisCompletedEvent = z.infer<typeof AnalysisCompletedSchema>;
 

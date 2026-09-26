@@ -4,7 +4,7 @@ from app.core.config import settings
 
 _client = AsyncGroq(api_key=settings.groq_api_key)
 
-CHAT_MODEL = "llama-3.3-70b-versatile"
+CHAT_MODEL = "openai/gpt-oss-120b"
 
 
 async def generate_completion(prompt: str, system_prompt: str | None = None) -> str:

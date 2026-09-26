@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from app.infrastructure.llm.embedding_client import generate_embedding
@@ -9,6 +10,8 @@ from app.infrastructure.persistence.document_chunk_repository import DocumentChu
 from app.infrastructure.persistence.models import DocumentChunk
 from app.infrastructure.storage.supabase_storage_client import download_file
 from app.infrastructure.text_extraction.extractor import extract_text_and_chunk
+
+logger = logging.getLogger(__name__)
 
 
 async def process_document(
@@ -40,4 +43,10 @@ async def process_document(
         await publish_document_embedded(document_id=document_id, chunks_count=len(chunks))
 
     except Exception as exc:
-        await publish_document_embedding_failed(document_id=document_id, reason=str(exc))
+        logger.exception("Failed to process document %s", document_id)
+        try:
+            await publish_document_embedding_failed(document_id=document_id, reason=str(exc))
+        except Exception:
+            logger.exception(
+                "Failed to publish embedding-failed event for document %s", document_id
+            )

@@ -19,8 +19,8 @@ export class AnalysisCompletedListener {
     await this.useCase.execute({
       analysisId: event.analysisId,
       result: event.result,
-      sourcePage: event.sourcePage,
-      confidence: event.confidence,
+      sourcePage: event.sourcePage ?? undefined,
+      confidence: event.confidence ?? undefined,
     });
   }
 }
