@@ -18,10 +18,19 @@ export class ChatService {
 
   async streamChatToResponse(body: ChatRequestBody, res: Response): Promise<void> {
     const response = await firstValueFrom(
-      this.httpService.post(`${this.ragServiceUrl}/chat`, body, {
-        responseType: "stream",
-        headers: { Accept: "text/event-stream" },
-      }),
+      this.httpService.post(
+        `${this.ragServiceUrl}/chat`,
+        {
+          user_id: body.userId,
+          question: body.question,
+          session_id: body.sessionId,
+          document_id: body.documentId,
+        },
+        {
+          responseType: "stream",
+          headers: { Accept: "text/event-stream" },
+        },
+      ),
     );
 
     res.setHeader("Content-Type", "text/event-stream");

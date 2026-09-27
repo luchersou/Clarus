@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
   });
 
   if (!gatewayResponse.ok || !gatewayResponse.body) {
-    return NextResponse.json({ error: "Failed to reach chat service" }, { status: 502 });
+    const errorBody = await gatewayResponse.text().catch(() => null);
+    console.error("Chat gateway error:", gatewayResponse.status, errorBody);
+    return NextResponse.json(
+      { error: "Failed to reach chat service" },
+      { status: 502 },
+    );
   }
 
   return new NextResponse(gatewayResponse.body, {

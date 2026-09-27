@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { createParser, type EventSourceMessage } from "eventsource-parser";
 
 interface Source {
   documentName: string;
@@ -32,6 +33,41 @@ export function useChatStream() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    const handleEvent = (event: EventSourceMessage) => {
+      if (event.event === "session") {
+        sessionIdRef.current = event.data;
+      } else if (event.event === "message") {
+        assistantContent += event.data;
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            role: "assistant",
+            content: assistantContent,
+          };
+          return updated;
+        });
+      } else if (event.event === "sources") {
+        try {
+          const sources: Source[] = JSON.parse(event.data);
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              sources,
+            };
+            return updated;
+          });
+        } catch {
+          // payload malformado — ignora, não derruba a resposta
+        }
+      } else if (event.event === "error") {
+        throw new Error(event.data || "The assistant ran into an error.");
+      }
+    };
+
+    const parser = createParser({ onEvent: handleEvent });
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -49,54 +85,11 @@ export function useChatStream() {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const events = buffer.split("\n\n");
-        buffer = events.pop() ?? "";
-
-        for (const rawEvent of events) {
-          const eventTypeMatch = rawEvent.match(/^event: (.+)$/m);
-          const dataMatch = rawEvent.match(/^data: (.*)$/m);
-          const eventType = eventTypeMatch?.[1];
-          const data = dataMatch?.[1] ?? "";
-
-          if (eventType === "session") {
-            sessionIdRef.current = data;
-          } else if (eventType === "message") {
-            assistantContent += data;
-            setMessages((prev) => {
-              const updated = [...prev];
-              updated[updated.length - 1] = {
-                ...updated[updated.length - 1],
-                role: "assistant",
-                content: assistantContent,
-              };
-              return updated;
-            });
-          } else if (eventType === "sources") {
-            try {
-              const sources: Source[] = JSON.parse(data);
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = {
-                  ...updated[updated.length - 1],
-                  sources,
-                };
-                return updated;
-              });
-            } catch {
-              // Malformed sources payload — ignore silently,
-              // the response itself shouldn't fail because of this
-            }
-          } else if (eventType === "error") {
-            throw new Error(data || "The assistant ran into an error.");
-          }
-        }
+        parser.feed(decoder.decode(value, { stream: true }));
       }
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
