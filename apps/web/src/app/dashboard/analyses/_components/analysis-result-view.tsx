@@ -1,15 +1,14 @@
-interface AnalysisResult {
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+interface AnalysisResultViewProps {
   content: string;
 }
 
-interface AnalysisResultViewProps {
-  result: AnalysisResult;
-}
-
-export function AnalysisResultView({ result }: AnalysisResultViewProps) {
+export function AnalysisResultView({ content }: AnalysisResultViewProps) {
   return (
-    <div className="whitespace-pre-wrap rounded-sm border bg-muted/20 p-4 text-sm leading-relaxed text-foreground">
-      {result.content}
+    <div className="prose prose-sm prose-neutral max-w-none overflow-x-auto">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
 }

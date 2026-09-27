@@ -121,7 +121,7 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
               </Button>
             </div>
           ) : analysis.result ? (
-            <AnalysisResultView result={analysis.result} />
+            <AnalysisResultView content={analysis.result.content} />
           ) : null}
         </CardContent>
       ) : null}
