@@ -1,114 +1,106 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# API Gateway
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Single entry point for the Clarus frontend. It authenticates every request and forwards it to the right service. It has no database and no business logic.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Responsibilities
 
-## Description
+- Validate the Supabase access token on every protected route
+- Route each request to the service that owns the data, using the transport that fits the operation
+- Translate errors from downstream services into HTTP responses
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Routes
 
-## Project setup
+| Endpoint | Transport | Target |
+|---|---|---|
+| `POST /documents/upload` | HTTP (multipart) | documents-service |
+| `GET /documents` | RPC | documents-service |
+| `GET /documents/:id` | RPC | documents-service |
+| `DELETE /documents/:id` | RPC | documents-service |
+| `POST /analyses` | RPC | analysis-service |
+| `GET /analyses?documentId=` | RPC | analysis-service |
+| `GET /analyses/:id` | RPC | analysis-service |
+| `POST /chat` (SSE stream) | HTTP | rag-service |
+| `GET /chat/sessions` | HTTP | rag-service |
+| `GET /chat/sessions/:id/messages` | HTTP | rag-service |
+| `GET /dashboard/summary` | RPC | documents-service, analysis-service |
 
-```bash
-$ pnpm install
+## Design notes
+
+- **Thin by design.** The gateway only authenticates, routes, and maps errors. Business rules live in the services that own the data, so it doesn't use the layered structure of the domain services.
+- **Identity comes from the token.** The user ID is always taken from the validated token, never from the request body or query string.
+- **Transport follows the payload.** Reads and commands go over RabbitMQ RPC. File uploads and chat streaming use plain HTTP: multipart bodies don't fit a message queue, and the chat response is streamed to the client as it is generated.
+
+## Project structure
+
+```
+apps/api-gateway/
+├── src/
+│   ├── auth/
+│   │   ├── supabase-auth.guard.ts        # Validates the Supabase token on protected routes
+│   │   ├── current-user.decorator.ts     # Exposes the authenticated user to controllers
+│   │   └── auth.module.ts
+│   │
+│   ├── shared/
+│   │   ├── rpc-client.service.ts         # Wrapper for RabbitMQ request/response calls
+│   │   └── rpc-error.mapper.ts           # Maps RPC errors to HTTP exceptions
+│   │
+│   ├── documents/
+│   │   ├── documents.controller.ts       # Upload, list, get, and delete routes
+│   │   ├── documents.service.ts          # RPC calls and upload forwarding to documents-service
+│   │   └── documents.module.ts
+│   │
+│   ├── analyses/
+│   │   ├── analyses.controller.ts        # Request, list, and get analysis routes
+│   │   ├── analyses.service.ts           # RPC calls to analysis-service
+│   │   └── analyses.module.ts
+│   │
+│   ├── chat/
+│   │   ├── chat.controller.ts            # Chat stream and session routes
+│   │   ├── chat.service.ts               # HTTP calls to rag-service, pipes the SSE stream
+│   │   └── chat.module.ts
+│   │
+│   ├── dashboard/
+│   │   ├── dashboard.controller.ts       # Dashboard summary route
+│   │   ├── dashboard.service.ts          # Aggregates data from documents and analyses
+│   │   └── dashboard.module.ts
+│   │
+│   ├── messaging/
+│   │   └── messaging.module.ts           # RabbitMQ connection and exchanges
+│   │
+│   ├── app.module.ts
+│   └── main.ts                           # Bootstrap and CORS setup
+│
+├── .env
+└── package.json
 ```
 
-## Compile and run the project
+## Configuration
 
-```bash
-# development
-$ pnpm run start
+Create an `.env` file in this folder:
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```dotenv
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_ANON_KEY=<your-supabase-publishable-key>
+RABBITMQ_URL=amqp://guest:guest@localhost:5672
+DOCUMENTS_SERVICE_URL=http://localhost:3002
+RAG_SERVICE_URL=http://localhost:3004
 ```
 
-## Run tests
+| Variable | Description |
+|---|---|
+| `SUPABASE_URL` | Supabase project URL, used by the auth guard |
+| `SUPABASE_ANON_KEY` | Supabase publishable key, used by the auth guard |
+| `RABBITMQ_URL` | RabbitMQ connection string, used for RPC |
+| `DOCUMENTS_SERVICE_URL` | Base URL of `documents-service`, used for uploads |
+| `RAG_SERVICE_URL` | Base URL of `rag-service`, used for chat |
+
+## Running
+
+RabbitMQ must be running (`docker compose up -d` from the repository root), and the services behind each route must be up for it to respond.
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+# From the repository root
+pnpm dev:api
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+The gateway listens on `http://localhost:3001`.
