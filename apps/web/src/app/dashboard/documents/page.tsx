@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { DocumentUploadPanel } from "./_components/document-upload-panel";
 import { DocumentsList } from "./_components/documents-list";
+import { DocumentsListSkeleton } from "./_components/documents-list-skeleton";
 
 export default function DocumentsPage() {
   return (
@@ -14,7 +15,7 @@ export default function DocumentsPage() {
 
       <DocumentUploadPanel />
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<DocumentsListSkeleton />}>
         <DocumentsList />
       </Suspense>
     </div>
