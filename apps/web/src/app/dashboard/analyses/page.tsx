@@ -3,6 +3,8 @@ import { getDocuments } from "@/lib/api/documents";
 import { NewAnalysisForm } from "./_components/new-analysis-form";
 import { AnalysesFilter } from "./_components/analyses-filter";
 import { AnalysesList } from "./_components/analyses-list";
+import { NewAnalysisFormSkeleton } from "./_components/new-analysis-form-skeleton";
+import { AnalysesListSkeleton } from "./_components/analyses-list-skeleton";
 
 interface AnalysesPageProps {
   searchParams: Promise<{ documentId?: string }>;
@@ -21,7 +23,7 @@ export default async function AnalysesPage({ searchParams }: AnalysesPageProps) 
         </p>
       </div>
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<NewAnalysisFormSkeleton />}>
         <NewAnalysisForm />
       </Suspense>
 
@@ -30,7 +32,7 @@ export default async function AnalysesPage({ searchParams }: AnalysesPageProps) 
         <AnalysesFilter documents={documents} />
       </div>
 
-      <Suspense key={documentId} fallback={<div>Loading...</div>}>
+      <Suspense key={documentId} fallback={<AnalysesListSkeleton />}>
         <AnalysesList documentId={documentId} />
       </Suspense>
     </div>
