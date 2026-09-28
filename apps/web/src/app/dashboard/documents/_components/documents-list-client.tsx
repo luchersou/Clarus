@@ -90,7 +90,7 @@ export function DocumentsListClient({ documents }: DocumentsListClientProps) {
                     {formatDate(document.createdAt)}
                   </TableCell>
                   <TableCell
-                    className="text-right"
+                    className="flex justify-end"
                     onClick={(event) => event.stopPropagation()}
                   >
                     <DocumentActionsRow
