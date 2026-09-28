@@ -1,4 +1,7 @@
 import { AlertCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import { cn } from "@/lib/utils";
 import { MessageSources } from "./message-sources";
 
@@ -22,6 +25,7 @@ export function MessageBubble({
   isError = false,
 }: MessageBubbleProps) {
   const isUser = role === "user";
+  const shouldRenderMarkdown = !isUser && !isError;
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
@@ -41,7 +45,15 @@ export function MessageBubble({
             Something went wrong
           </div>
         )}
-        <p className="whitespace-pre-wrap">{content}</p>
+
+        {shouldRenderMarkdown ? (
+          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{content}</p>
+        )}
+
         {!isUser && !isError && <MessageSources sources={sources} />}
       </div>
     </div>
