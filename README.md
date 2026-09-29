@@ -65,7 +65,7 @@ sequenceDiagram
 | [`api-gateway`](apps/api-gateway/README.md) | NestJS | Single entry point: validates the Supabase JWT and routes requests to the services. No database |
 | [`documents-service`](apps/documents-service/README.md) | NestJS, Prisma | Document lifecycle: upload, listing, status, soft delete |
 | [`analysis-service`](apps/analysis-service/README.md) | NestJS, Prisma | Analysis requests and results |
-| [`rag-service`](apps/rag-service/README.md) | Python, FastAPI, SQLAlchemy, Alembic | Text extraction, embeddings, retrieval, LLM calls, chat |
+| [`rag-service`](apps/rag-service/README.md) | Python, FastAPI, Pydantic, SQLAlchemy, Alembic, PgVector | Text extraction, embeddings, retrieval, LLM calls, chat |
 | [`event-contracts`](packages/event-contracts/README.md) | TypeScript, Zod | Shared messaging topology and event schemas |
 
 ## Design decisions
