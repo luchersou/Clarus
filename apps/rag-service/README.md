@@ -46,6 +46,7 @@ Two providers, two jobs: Groq generates text (chat answers, analysis results); G
 
 ## Project structure
 
+```
 apps/rag-service/
 ├── app/
 │   ├── core/
@@ -96,6 +97,7 @@ apps/rag-service/
 │   └── env.py                            # Configured for async SQLAlchemy, restricted to the `rag` schema
 ├── .env
 └── pyproject.toml
+```
 
 
 ## Configuration
