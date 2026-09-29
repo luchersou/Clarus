@@ -102,11 +102,11 @@ RAG_SERVICE_URL=http://localhost:3004
 
 ## Running
 
-RabbitMQ must be running (`docker compose up -d` from the repository root), and the services behind each route must be up for it to respond.
+RabbitMQ and Postgres must be running (`docker compose up -d` from the repository root), and migrations must have been applied (`pnpm run setup` from the repository root, or `pnpm db:migrate:documents` for just this service).
 
 ```bash
 # From the repository root
-pnpm dev:api
+pnpm dev:documents
 ```
 
-The gateway listens on `http://localhost:3001`.
+The service listens on `http://localhost:3002`. 

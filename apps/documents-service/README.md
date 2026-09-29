@@ -1,114 +1,138 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# documents-service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Owns the lifecycle of uploaded documents: storing the file, tracking processing status, and soft deleting. It's the first participant in the document processing saga.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Responsibilities
 
-## Description
+- Accept file uploads and store them in Supabase Storage
+- Persist document metadata and status (`UPLOADED`, `PROCESSED`, `FAILED`)
+- Publish `document.uploaded` so `rag-service` can process the file
+- React to `document.embedded` / `document.embedding_failed` to update status
+- Serve document data to the gateway over RPC, scoped to the requesting user
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Endpoints
 
-## Project setup
+| Type | Route / routing key | Use case |
+|---|---|---|
+| HTTP | `POST /documents` | `UploadDocumentUseCase` |
+| RPC | `documents.list` | `ListDocumentsUseCase` |
+| RPC | `documents.get-by-id` | `GetDocumentUseCase` |
+| RPC | `documents.delete` | `DeleteDocumentUseCase` |
 
-```bash
-$ pnpm install
+Upload is HTTP because the payload is a multipart file, not message-shaped. The other three are RPC over RabbitMQ, called by the `api-gateway`.
+
+## Events
+
+| Direction | Event | When |
+|---|---|---|
+| Publishes | `document.uploaded` | After the file is stored and the document is persisted |
+| Consumes | `document.embedded` | `rag-service` finished processing the document |
+| Consumes | `document.embedding_failed` | `rag-service` failed to process the document |
+
+Listeners tolerate a document that no longer exists (for example, soft-deleted while still being processed) and return without error, since there's no caller waiting on an async event.
+
+## Architecture
+
+Clean Architecture, with dependencies pointing inward:
+
+- **`domain`** — the `Document` entity carries the business rules (valid status transitions, soft delete). `document.repository.ts` is the interface the infrastructure implements.
+- **`application`** — one use case per operation. Each depends only on the domain and on ports (repository, file storage, event publisher), never on Prisma, RabbitMQ, or Supabase directly.
+- **`infrastructure`** — the adapters: Prisma repository, Supabase Storage client, RabbitMQ publisher and listeners.
+- **`presentation`** — the HTTP controller and RPC handler, plus response mapping and exception filters.
+
+`GetDocumentUseCase` and `DeleteDocumentUseCase` check that the document belongs to the requesting user and return "not found" rather than "forbidden" on a mismatch, so the existence of another user's document isn't revealed.
+
+## Project structure
+
+```
+apps/documents-service/
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+│
+├── src/
+│   ├── domain/
+│   │   ├── errors/
+│   │   │   └── invalid-document-transition.error.ts   # Thrown on an invalid status transition
+│   │   ├── document-status.ts                          # DocumentStatus type
+│   │   ├── file-type.ts                                # FileType type
+│   │   ├── document.entity.ts                          # Aggregate: status transitions, soft delete
+│   │   └── document.repository.ts                      # Repository interface (port)
+│   │
+│   ├── application/
+│   │   ├── dto/
+│   │   │   ├── documents-rpc.dto.ts                    # Zod schemas for RPC payloads
+│   │   │   └── upload-document.dto.ts                  # Zod schema for the upload request body
+│   │   ├── ports/
+│   │   │   ├── document-event-publisher.port.ts        # Port for publishing domain events
+│   │   │   └── file-storage.port.ts                    # Port for file storage
+│   │   ├── get-document.use-case.ts                    # Fetch one document, checks ownership
+│   │   ├── delete-document.use-case.ts                 # Soft delete, checks ownership
+│   │   ├── list-documents.use-case.ts                  # List a user's documents
+│   │   ├── upload-document.use-case.ts                 # Store the file, persist, publish document.uploaded
+│   │   ├── mark-document-processed.use-case.ts         # Reacts to document.embedded
+│   │   └── mark-document-failed.use-case.ts            # Reacts to document.embedding_failed
+│   │
+│   ├── infrastructure/
+│   │   ├── persistence/
+│   │   │   ├── prisma.service.ts
+│   │   │   ├── prisma.module.ts
+│   │   │   ├── document.prisma-repository.ts           # Implements document.repository.ts
+│   │   │   └── generated/                              # Prisma client output
+│   │   ├── messaging/
+│   │   │   ├── rabbitmq.module.ts                      # Declares exchanges, registers publisher and listeners
+│   │   │   ├── document-event-publisher.ts             # Implements document-event-publisher.port.ts
+│   │   │   └── listeners/
+│   │   │       ├── document-embedded.listener.ts       # Consumes document.embedded
+│   │   │       └── document-embedding-failed.listener.ts  # Consumes document.embedding_failed
+│   │   └── storage/
+│   │       └── supabase-storage.service.ts             # Implements file-storage.port.ts
+│   │
+│   ├── presentation/
+│   │   ├── rpc/
+│   │   │   └── documents.rpc-handler.ts                # RPC handlers: list, get-by-id, delete
+│   │   ├── filters/
+│   │   │   ├── rpc-exception.filter.ts
+│   │   │   └── zod-exception.filter.ts                 # Maps Zod validation errors to HTTP 400
+│   │   ├── document-response.mapper.ts                 # Maps the entity to the HTTP/RPC response shape
+│   │   └── documents.controller.ts                     # HTTP route: upload
+│   │
+│   ├── documents.module.ts
+│   └── app.module.ts
+│
+├── .env
+└── package.json
 ```
 
-## Compile and run the project
+## Configuration
 
-```bash
-# development
-$ pnpm run start
+Create an `.env` file in this folder:
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```dotenv
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/clarus"
+RABBITMQ_URL="amqp://guest:guest@localhost:5672"
+SUPABASE_URL="https://<your-project>.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="<your-supabase-secret-key>"
+PORT=3002
 ```
 
-## Run tests
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Postgres connection string. All services share one instance; this one uses the `documents` schema |
+| `RABBITMQ_URL` | RabbitMQ connection string |
+| `SUPABASE_URL` | Supabase project URL, used for Storage |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key, used to upload files server-side |
+| `PORT` | HTTP port for the upload route |
+
+## Running
+
+RabbitMQ and Postgres must be running (`docker compose up -d` from the repository root).
 
 ```bash
-# unit tests
-$ pnpm run test
+# Generate the Prisma client and run migrations
+pnpm exec prisma generate
+pnpm exec prisma migrate deploy
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+# Start the service
+pnpm start:dev
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
