@@ -115,21 +115,21 @@ sequenceDiagram
 ### Run locally
 
 ```bash
-# 1. Install dependencies
-pnpm install
-
-# 2. Start RabbitMQ and PostgreSQL (schemas are created automatically on first run)
+# 1. Start RabbitMQ and PostgreSQL (schemas are created automatically on first run)
 docker compose up -d
 
-# 3. Build the shared contracts package
-pnpm --filter @clarus/event-contracts build
+# 2. Create a .env file in each service (each service's README lists its variables)
 
-# 4. Configure environment variables and run migrations.
-#    Each service documents its own variables and migration command in its README.
+# 3. Install dependencies, build the shared contracts, and run the Prisma migrations
+pnpm run setup
 
-# 5. Run the rag-service migrations
+# 4. Run the rag-service migrations
 uv run --directory apps/rag-service alembic upgrade head
 
-# 6. Start every service in a single terminal
+# 5. Start every service in a single terminal
 pnpm dev
 ```
+
+`pnpm dev` runs the web app, the API gateway, and the three domain services together. The web app is served at `http://localhost:3000`, and RabbitMQ's management UI at `http://localhost:15672` (`guest` / `guest`).
+
+Use `pnpm run setup`, not `pnpm setup`, which is a built-in pnpm command.
