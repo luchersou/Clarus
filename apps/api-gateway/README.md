@@ -42,7 +42,8 @@ apps/api-gateway/
 │   │
 │   ├── shared/
 │   │   ├── rpc-client.service.ts         # Wrapper for RabbitMQ request/response calls
-│   │   └── rpc-error.mapper.ts           # Maps RPC errors to HTTP exceptions
+│   │   ├── rpc-error.mapper.ts           # Maps RPC errors to HTTP exceptions
+│   │   └── shared.module.ts
 │   │
 │   ├── documents/
 │   │   ├── documents.controller.ts       # Upload, list, get, and delete routes
@@ -55,6 +56,8 @@ apps/api-gateway/
 │   │   └── analyses.module.ts
 │   │
 │   ├── chat/
+│   │   ├── dto/
+│   │   │   └── chat.dto.ts               # Zod schema for the chat request body
 │   │   ├── chat.controller.ts            # Chat stream and session routes
 │   │   ├── chat.service.ts               # HTTP calls to rag-service, pipes the SSE stream
 │   │   └── chat.module.ts
@@ -63,6 +66,9 @@ apps/api-gateway/
 │   │   ├── dashboard.controller.ts       # Dashboard summary route
 │   │   ├── dashboard.service.ts          # Aggregates data from documents and analyses
 │   │   └── dashboard.module.ts
+│   │
+│   ├── filter/
+│   │   └── zod-exception.filter.ts       # Maps Zod validation errors to HTTP 400
 │   │
 │   ├── messaging/
 │   │   └── messaging.module.ts           # RabbitMQ connection and exchanges

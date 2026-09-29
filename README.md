@@ -4,8 +4,6 @@
 
 Clarus is a SaaS platform for financial document analysis. Users upload contracts, invoices, and reports, then either run **structured actions** (Summary, Extract values, Deadlines, Comparison) or **chat** with their documents. Answers are generated with retrieval-augmented generation (RAG), grounded in the content of the user's own files.
 
-Instead of an open-ended chat where results depend on how a question is phrased, the main workflow is a fixed set of actions, so results stay consistent and predictable.
-
 ## Features
 
 - Document upload with asynchronous processing (text extraction, chunking, embeddings)

@@ -28,6 +28,7 @@
   "packageManager": "pnpm@11.23.0",
   "type": "module",
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "tsup": "^8.5.1"
   }
 }
