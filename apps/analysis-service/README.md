@@ -105,15 +105,19 @@ Create an `.env` file in this folder:
 
 ```dotenv
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/clarus"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/clarus"
 RABBITMQ_URL="amqp://guest:guest@localhost:5672"
 PORT=3003
 ```
 
 | Variable | Description |
 |---|---|
-| `DATABASE_URL` | Postgres connection string. All services share one instance; this one uses the `analyses` schema |
+| `DATABASE_URL` | Postgres connection string used by the application at runtime |
+| `DIRECT_URL` | Direct Postgres connection string used by Prisma for migrations |
 | `RABBITMQ_URL` | RabbitMQ connection string |
 | `PORT` | Service port |
+
+> **Note:** `DIRECT_URL` is only required when using a hosted PostgreSQL provider such as Supabase. For a local PostgreSQL instance, `DATABASE_URL` can be used directly for Prisma migrations.
 
 ## Running
 

@@ -20,5 +20,4 @@
     "strictPropertyInitialization": false,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src/**/*", "prisma/generated/**/*"]
 }

@@ -284,7 +284,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.6
       '@types/node':
-        specifier: ^24.0.0
+        specifier: ^24.13.4
         version: 24.13.4
       '@types/pg':
         specifier: ^8.23.1

@@ -112,6 +112,7 @@ Create an `.env` file in this folder:
 
 ```dotenv
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/clarus"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/clarus"
 RABBITMQ_URL="amqp://guest:guest@localhost:5672"
 SUPABASE_URL="https://<your-project>.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="<your-supabase-secret-key>"
@@ -120,11 +121,14 @@ PORT=3002
 
 | Variable | Description |
 |---|---|
-| `DATABASE_URL` | Postgres connection string. All services share one instance; this one uses the `documents` schema |
+| `DATABASE_URL` | Postgres connection string used by the application at runtime |
+| `DIRECT_URL` | Direct Postgres connection string used by Prisma for migrations |
 | `RABBITMQ_URL` | RabbitMQ connection string |
 | `SUPABASE_URL` | Supabase project URL, used for Storage |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key, used to upload files server-side |
 | `PORT` | HTTP port for the upload route |
+
+> **Note:** `DIRECT_URL` is only required when using a hosted PostgreSQL provider such as Supabase. For a local PostgreSQL instance, `DATABASE_URL` can be used directly for Prisma migrations.
 
 ## Running
 
