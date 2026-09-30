@@ -38,6 +38,7 @@ apps/api-gateway/
 │   ├── auth/
 │   │   ├── supabase-auth.guard.ts        # Validates the Supabase token on protected routes
 │   │   ├── current-user.decorator.ts     # Exposes the authenticated user to controllers
+│   │   ├── public.decorator.ts           # Marks a route as exempt from the auth guard
 │   │   └── auth.module.ts
 │   │
 │   ├── shared/
@@ -66,6 +67,9 @@ apps/api-gateway/
 │   │   ├── dashboard.controller.ts       # Dashboard summary route
 │   │   ├── dashboard.service.ts          # Aggregates data from documents and analyses
 │   │   └── dashboard.module.ts
+│   │
+│   ├── health/
+│   │   └── health.controller.ts          # GET /health, public — used by Render's health check
 │   │
 │   ├── filter/
 │   │   └── zod-exception.filter.ts       # Maps Zod validation errors to HTTP 400
