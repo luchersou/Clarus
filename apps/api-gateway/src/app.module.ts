@@ -5,6 +5,7 @@ import { DocumentsModule } from "./documents/documents.module.js";
 import { AnalysesModule } from "./analyses/analyses.module.js";
 import { ChatModule } from "./chat/chat.module.js";
 import { DashboardModule } from "./dashboard/dashboard.module.js";
+import { HealthController } from "./health/health.controller.js";
 
 @Module({
   imports: [
@@ -17,5 +18,6 @@ import { DashboardModule } from "./dashboard/dashboard.module.js";
     ChatModule,
     DashboardModule,
   ],
+  controllers: [HealthController]
 })
 export class AppModule {}
