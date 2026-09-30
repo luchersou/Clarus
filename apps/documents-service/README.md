@@ -91,6 +91,8 @@ apps/documents-service/
 │   ├── presentation/
 │   │   ├── rpc/
 │   │   │   └── documents.rpc-handler.ts                # RPC handlers: list, get-by-id, delete
+│   │   ├── health/
+│   │   │   └── health.controller.ts                    # GET /health — used by Render's health check 
 │   │   ├── filters/
 │   │   │   ├── rpc-exception.filter.ts
 │   │   │   └── zod-exception.filter.ts                 # Maps Zod validation errors to HTTP 400
