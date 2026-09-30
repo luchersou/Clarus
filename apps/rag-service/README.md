@@ -88,6 +88,7 @@ apps/rag-service/
 │   │   └── analysis_completed.py
 │   │
 │   ├── api/
+│   │   ├── health_router.py              # GET /health — used by Render's health check
 │   │   └── chat_router.py                # POST /chat (SSE) and the two session-listing routes
 │   │
 │   └── main.py                           # FastAPI app; starts consumers on startup, closes RabbitMQ on shutdown
