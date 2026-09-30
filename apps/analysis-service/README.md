@@ -88,6 +88,8 @@ apps/analysis-service/
 │   │   │   └── analyses.rpc-handler.ts                 # RPC handlers: request, list, get-by-id, delete
 │   │   ├── filters/
 │   │   │   └── rpc-exception.filter.ts
+│   │   ├── health/
+│   │   │   └── health.controller.ts                    # GET /health — used by Render's health check
 │   │   └── analysis-response.mapper.ts                 # Maps the entity to the RPC response shape
 │   │
 │   ├── analyses.module.ts
