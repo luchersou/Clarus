@@ -13,7 +13,14 @@
     "dev:api": "pnpm --filter api-gateway start",
     "dev:documents": "pnpm --filter documents-service start",
     "dev:analysis": "pnpm --filter analysis-service start",
-    "dev:rag": "cd apps/rag-service && uv run uvicorn app.main:app --reload --port 3004"
+    "dev:rag": "cd apps/rag-service && uv run uvicorn app.main:app --reload --port 3004",
+    "build:contracts": "pnpm --filter @clarus/event-contracts build",
+    "build:api": "pnpm build:contracts && pnpm --filter api-gateway build",
+    "build:documents": "pnpm build:contracts && pnpm --filter documents-service build",
+    "build:analysis": "pnpm build:contracts && pnpm --filter analysis-service build",
+    "start:api": "pnpm --filter api-gateway start:prod",
+    "start:documents": "pnpm --filter documents-service start:prod",
+    "start:analysis": "pnpm --filter analysis-service start:prod"
   },
   "keywords": [],
   "author": "",
