@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
 interface RecentAnalysis {
   id: string;
@@ -27,14 +28,6 @@ const TYPE_LABEL: Record<string, string> = {
   DEADLINES: "Deadlines",
   COMPARE: "Comparison",
 };
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export function RecentAnalysesCardClient({ analyses, hasDocuments }: RecentAnalysesCardClientProps) {
   return (

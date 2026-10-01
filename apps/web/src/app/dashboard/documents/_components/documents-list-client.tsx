@@ -15,6 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { formatDate } from "@/lib/utils";
+
 interface Document {
   id: string;
   fileName: string;
@@ -32,14 +34,6 @@ const FILE_ICONS = {
   DOCX: FileText,
   XLSX: FileSpreadsheet,
 };
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export function DocumentsListClient({ documents }: DocumentsListClientProps) {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
