@@ -65,7 +65,7 @@ export default function Search() {
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <DialogHeader>
-          <DialogTitle>Search</DialogTitle>
+          <DialogTitle className="mt-2 ml-2">Search</DialogTitle>
         </DialogHeader>
 
         <Command>
