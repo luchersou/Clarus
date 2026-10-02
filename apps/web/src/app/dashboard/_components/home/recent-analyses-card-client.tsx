@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 interface RecentAnalysis {
   id: string;
@@ -16,10 +16,10 @@ interface RecentAnalysesCardClientProps {
   hasDocuments: boolean;
 }
 
-const STATUS_VARIANT: Record<RecentAnalysis["status"], "outline" | "secondary" | "destructive"> = {
-  PENDING: "secondary",
-  COMPLETED: "outline",
-  FAILED: "destructive",
+const STATUS_STYLES: Record<RecentAnalysis["status"], string> = {
+  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  COMPLETED: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
+  FAILED: "border-destructive/30 bg-destructive/10 text-destructive",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -80,7 +80,10 @@ export function RecentAnalysesCardClient({ analyses, hasDocuments }: RecentAnaly
                     {formatDate(analysis.createdAt)}
                   </p>
                 </div>
-                <Badge variant={STATUS_VARIANT[analysis.status]} className="shrink-0">
+                <Badge
+                  variant="outline"
+                  className={cn("shrink-0", STATUS_STYLES[analysis.status])}
+                >
                   {analysis.status}
                 </Badge>
               </div>
