@@ -85,7 +85,7 @@ function FaqItem({
 export function FAQ() {
   return (
     <Reveal className="py-16 md:py-28 relative z-10">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div id="faq" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1.5 md:mb-3">
             FAQ
