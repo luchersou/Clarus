@@ -3,11 +3,21 @@
 import { useRef, useState } from "react";
 import {
   motion,
+  MotionConfig,
   useScroll,
-  useTransform,
   useMotionValueEvent,
-} from "framer-motion";
+  useTransform,
+} from "motion/react";
 import { Check, FileText } from "lucide-react";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+const reveal = (x = 0, y = 24, delay = 0) => ({
+  initial: { opacity: 0, x, y },
+  whileInView: { opacity: 1, x: 0, y: 0 },
+  viewport: { once: true, amount: 0.4 },
+  transition: { duration: 0.7, ease: EASE, delay },
+});
 
 const ACTIONS = [
   { label: "Summary", active: false },
@@ -34,7 +44,13 @@ function UploadVisual() {
         </div>
       </div>
       <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-full rounded-full bg-primary" />
+        <motion.div
+          className="h-full w-full origin-left rounded-full bg-primary"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
+        />
       </div>
       <p className="mt-1.5 text-right font-mono text-[10px] text-muted-foreground">
         Uploaded
@@ -57,7 +73,16 @@ function ActionVisual() {
             }
           >
             {label}
-            {active && <Check className="size-3.5" />}
+            {active && (
+              <motion.span
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true, amount: 0.8 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.6 }}
+              >
+                <Check className="size-3.5" />
+              </motion.span>
+            )}
           </div>
         ))}
       </div>
@@ -69,19 +94,32 @@ function ResultVisual() {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="space-y-2">
-        {RESULT.map(({ field, value }) => (
-          <div key={field} className="flex items-center justify-between gap-6">
+        {RESULT.map(({ field, value }, i) => (
+          <motion.div
+            key={field}
+            className="flex items-center justify-between gap-6"
+            initial={{ opacity: 0, x: -8 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.8 }}
+            transition={{ duration: 0.5, ease: EASE, delay: 0.5 + i * 0.15 }}
+          >
             <span className="text-xs text-muted-foreground">{field}</span>
             <span className="font-mono text-xs font-medium">{value}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
-      <div className="mt-3 flex items-center gap-1.5 border-t border-border pt-2">
+      <motion.div
+        className="mt-3 flex items-center gap-1.5 border-t border-border pt-2"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+      >
         <span className="size-1.5 rounded-full bg-primary" />
         <span className="font-mono text-[10px] text-muted-foreground">
           Source: page 3 · 98% confidence
         </span>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -124,29 +162,38 @@ function Step({ step, reversed }: { step: StepData; reversed: boolean }) {
     target: ref,
     offset: ["start 85%", "start 45%"],
   });
-  const progress = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   const [isActive, setIsActive] = useState(false);
-  useMotionValueEvent(progress, "change", (v) => setIsActive(v >= 0.98));
+  useMotionValueEvent(scrollYProgress, "change", (v) => setIsActive(v >= 0.98));
 
   const dotClass = `size-2 rounded-full transition-all duration-300 ${
     isActive ? "scale-125 bg-primary" : "bg-border"
   }`;
 
+  // Desktop: each block enters from the side of its own column
+  const textX = reversed ? 32 : -32;
+  const visualX = -textX;
+
   const textBlock = (
-    <div className={reversed ? "" : "md:text-right"}>
+    <motion.div
+      className={reversed ? "" : "md:text-right"}
+      {...reveal(textX, 0)}
+    >
       <span className="font-mono text-xs text-muted-foreground">{step.number}</span>
       <h3 className="mt-1 text-xl font-medium">{step.title}</h3>
       <p className={`mt-2 max-w-sm text-muted-foreground ${reversed ? "" : "md:ml-auto"}`}>
         {step.description}
       </p>
-    </div>
+    </motion.div>
   );
 
   const visualBlock = (
-    <div className={reversed ? "md:mr-auto" : "md:ml-auto"}>
+    <motion.div
+      className={reversed ? "md:mr-auto" : "md:ml-auto"}
+      {...reveal(visualX, 0, 0.15)}
+    >
       <div className="max-w-[220px]">{step.visual}</div>
-    </div>
+    </motion.div>
   );
 
   return (
@@ -154,10 +201,14 @@ function Step({ step, reversed }: { step: StepData; reversed: boolean }) {
       {/* Mobile: single column */}
       <div className="pl-10 md:hidden">
         <span className={`absolute left-0 top-1.5 ${dotClass}`} />
-        <span className="font-mono text-xs text-muted-foreground">{step.number}</span>
-        <h3 className="mt-1 text-xl font-medium">{step.title}</h3>
-        <p className="mt-2 text-muted-foreground">{step.description}</p>
-        <div className="mt-4 max-w-[220px]">{step.visual}</div>
+        <motion.div {...reveal(0, 24)}>
+          <span className="font-mono text-xs text-muted-foreground">{step.number}</span>
+          <h3 className="mt-1 text-xl font-medium">{step.title}</h3>
+          <p className="mt-2 text-muted-foreground">{step.description}</p>
+        </motion.div>
+        <motion.div className="mt-4 max-w-[220px]" {...reveal(0, 24, 0.15)}>
+          {step.visual}
+        </motion.div>
       </div>
 
       {/* Desktop: fixed columns, only the content alternates */}
@@ -179,26 +230,31 @@ export function HowItWorks() {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section id="how-it-works" className="px-4 py-24 md:px-6 md:py-32">
-      <div className="mx-auto max-w-4xl">
-        <h2 className="mb-24 text-center text-3xl font-semibold tracking-tight md:text-4xl">
-          How it works
-        </h2>
+    <MotionConfig reducedMotion="user">
+      <section id="how-it-works" className="px-4 py-24 md:px-6 md:py-32">
+        <div className="mx-auto max-w-4xl">
+          <motion.h2
+            className="mb-24 text-center text-3xl font-semibold tracking-tight md:text-4xl"
+            {...reveal(0, 24)}
+          >
+            How it works
+          </motion.h2>
 
-        <div ref={containerRef} className="relative">
-          <div className="absolute left-[3px] top-2 bottom-2 w-px bg-border md:left-1/2 md:-translate-x-1/2" />
-          <motion.div
-            className="absolute left-[3px] top-2 w-px bg-primary md:left-1/2 md:-translate-x-1/2"
-            style={{ height: lineHeight }}
-          />
+          <div ref={containerRef} className="relative">
+            <div className="absolute left-[3px] top-2 bottom-2 w-px bg-border md:left-1/2 md:-translate-x-1/2" />
+            <motion.div
+              className="absolute left-[3px] top-2 w-px bg-primary md:left-1/2 md:-translate-x-1/2"
+              style={{ height: lineHeight }}
+            />
 
-          <div className="flex flex-col gap-16 md:gap-24">
-            {STEPS.map((step, index) => (
-              <Step key={step.number} step={step} reversed={index % 2 === 1} />
-            ))}
+            <div className="flex flex-col gap-16 md:gap-24">
+              {STEPS.map((step, index) => (
+                <Step key={step.number} step={step} reversed={index % 2 === 1} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </MotionConfig>
   );
 }

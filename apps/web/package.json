@@ -19,6 +19,7 @@
     "eventsource-parser": "^4.1.1",
     "framer-motion": "^13.2.0",
     "lucide-react": "^1.39.0",
+    "motion": "^13.4.6",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",

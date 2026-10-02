@@ -1,6 +1,6 @@
 import { CTA } from "@/components/sections/cta";
 import { FAQ } from "@/components/sections/faq";
-import { FeaturesBento } from "@/components/sections/features-bento/features-bento";
+import { FeaturesBento } from "@/components/sections/features-bento";
 import { Hero } from "@/components/sections/hero";
 import { HowItWorks } from "@/components/sections/how-it-works";
 

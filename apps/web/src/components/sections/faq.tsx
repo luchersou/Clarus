@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 
 const FAQS = [
@@ -38,7 +39,11 @@ function FaqItem({
   const panelId = `faq-panel-${index}`;
 
   return (
-    <div className={cn("overflow-hidden mx-4", !isLast && "border-b border-foreground/5")}>
+    <Reveal
+      y={16}
+      delay={index * 0.08}
+      className={cn("overflow-hidden mx-4", !isLast && "border-b border-foreground/5")}
+    >
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -73,13 +78,13 @@ function FaqItem({
           </div>
         </div>
       </div>
-    </div>
+    </Reveal>
   );
 }
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-16 md:py-28 relative z-10">
+    <Reveal className="py-16 md:py-28 relative z-10">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1.5 md:mb-3">
@@ -105,6 +110,6 @@ export function FAQ() {
           ))}
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }

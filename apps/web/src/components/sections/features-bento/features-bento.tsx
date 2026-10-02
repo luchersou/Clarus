@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Reveal } from "@/components/reveal";
 import { ActionsPanel } from "./actions-panel";
 import { FormatsPanel } from "./formats-panel";
 import { AccuracyPanel } from "./accuracy-panel";
@@ -9,6 +10,7 @@ type Feature = {
   title: string;
   description: string;
   span: string;
+  delay: number;
   panel: ReactNode;
 };
 
@@ -18,12 +20,14 @@ const FEATURES: Feature[] = [
     description:
       "No prompt writing. Pick an action and get a consistent, predictable result every time.",
     span: "md:col-span-2",
+    delay: 0,
     panel: <ActionsPanel />,
   },
   {
     title: "Any financial document",
     description: "Contracts, invoices, reports — Clarus reads them all.",
     span: "md:col-span-1",
+    delay: 0.12,
     panel: <FormatsPanel />,
   },
   {
@@ -31,6 +35,7 @@ const FEATURES: Feature[] = [
     description:
       "Financial data demands accuracy. Every extracted value is traceable back to the source.",
     span: "md:col-span-1",
+    delay: 0,
     panel: <AccuracyPanel />,
   },
   {
@@ -38,6 +43,7 @@ const FEATURES: Feature[] = [
     description:
       "Each document flows through an async, fault-tolerant processing chain.",
     span: "md:col-span-2",
+    delay: 0.12,
     panel: <PipelinePanel />,
   },
   {
@@ -45,22 +51,29 @@ const FEATURES: Feature[] = [
     description:
       "Encrypted storage, isolated workspaces, no training on your data.",
     span: "md:col-span-3",
+    delay: 0,
     panel: <SecurityPanel />,
   },
 ];
 
 export function FeaturesBento() {
   return (
-    <section id="features" className="dark notched-card bg-background px-4 py-24 mx-2 text-foreground md:px-6 md:py-32">
+    <section
+      id="features"
+      className="dark notched-card bg-background px-4 py-24 mx-2 text-foreground md:px-6 md:py-32"
+    >
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-16 text-center text-3xl font-semibold tracking-tight md:text-4xl">
-          Everything a financial document needs
-        </h2>
+        <Reveal>
+          <h2 className="mb-16 text-center text-3xl font-semibold tracking-tight md:text-4xl">
+            Everything a financial document needs
+          </h2>
+        </Reveal>
 
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
           {FEATURES.map((feature) => (
-            <div
+            <Reveal
               key={feature.title}
+              delay={feature.delay}
               className={`group notched-card relative overflow-hidden rounded-2xl border border-border bg-card p-8 ${feature.span}`}
             >
               <div className="relative z-10 flex h-full flex-col justify-between gap-4">
@@ -78,7 +91,7 @@ export function FeaturesBento() {
 
               {/* esfumado */}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

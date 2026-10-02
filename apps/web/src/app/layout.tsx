@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clarus — AI-powered financial analysis",
+  title: "Clarus — AI-powered documents analysis",
   description:
     "Upload documents, run structured AI analyses, and chat with your files in plain language.",
   icons: {
