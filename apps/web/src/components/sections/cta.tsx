@@ -34,7 +34,7 @@ export function CTA() {
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                 <Link
-                  href="/sign-up"
+                  href="/login"
                   className="group relative inline-flex w-full sm:w-auto h-10 md:h-12 items-center justify-center gap-3 rounded-full bg-white hover:bg-white/90 px-8 text-sm font-medium text-black"
                 >
                   <span>Get started for free</span>
