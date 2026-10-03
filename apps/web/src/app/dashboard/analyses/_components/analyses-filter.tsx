@@ -37,7 +37,15 @@ export function AnalysesFilter({ documents }: AnalysesFilterProps) {
   return (
     <Select value={currentDocumentId} onValueChange={handleChange}>
       <SelectTrigger className="w-64">
-        <SelectValue placeholder="Filter by document" />
+        <SelectValue placeholder="Filter by document">
+          {(value: string) => {
+            if (!value || value === ALL_DOCUMENTS_VALUE) {
+              return "All documents";
+            }
+            const selected = documents.find((doc) => doc.id === value);
+            return selected?.fileName ?? value;
+          }}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={ALL_DOCUMENTS_VALUE}>All documents</SelectItem>
