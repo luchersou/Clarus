@@ -4,6 +4,19 @@
 
 Clarus is a SaaS platform for financial document analysis. Users upload contracts, invoices, and reports, then either run **structured actions** (Summary, Extract values, Deadlines, Comparison) or **chat** with their documents. Answers are generated with retrieval-augmented generation (RAG), grounded in the content of the user's own files.
 
+## Live demo
+
+[clarus-delta.vercel.app](https://clarus-delta.vercel.app)
+
+The backend services run on Render's free tier, which puts them to sleep after a period of inactivity. Before trying the demo, open each health check link below once — this wakes up the services, which can take 30-60 seconds. Without this, the first request may fail with an error page.
+
+| Service | Health check |
+|---|---|
+| API Gateway | [clarus-api-gateway.onrender.com/health](https://clarus-api-gateway.onrender.com/health) |
+| documents-service | [clarus-documents-service.onrender.com/health](https://clarus-documents-service.onrender.com/health) |
+| analysis-service | [clarus-analysis-service.onrender.com/health](https://clarus-analysis-service.onrender.com/health) |
+| rag-service | [clarus-rag-service.onrender.com/health](https://clarus-analysis-service.onrender.com/health) |
+
 ## Features
 
 - Document upload with asynchronous processing (text extraction, chunking, embeddings)
