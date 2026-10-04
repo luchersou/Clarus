@@ -15,7 +15,7 @@ The backend services run on Render's free tier, which puts them to sleep after a
 | API Gateway | [clarus-api-gateway.onrender.com/health](https://clarus-api-gateway.onrender.com/health) |
 | documents-service | [clarus-documents-service.onrender.com/health](https://clarus-documents-service.onrender.com/health) |
 | analysis-service | [clarus-analysis-service.onrender.com/health](https://clarus-analysis-service.onrender.com/health) |
-| rag-service | [clarus-rag-service.onrender.com/health](https://clarus-analysis-service.onrender.com/health) |
+| rag-service | [https://clarus-rag-services.onrender.com/health](https://clarus-rag-services.onrender.com/health) |
 
 ## Features
 
