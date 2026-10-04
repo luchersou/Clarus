@@ -82,7 +82,7 @@ export function Header() {
                 Log in
               </Button>
             </Link>
-            <Link href="/registro" className="hidden md:block">
+            <Link href="/login" className="hidden md:block">
               <Button className="h-8 px-4 text-xs font-medium">Get started</Button>
             </Link>
 
