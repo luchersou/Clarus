@@ -135,13 +135,10 @@ docker compose up -d
 
 # 2. Create a .env file in each service (each service's README lists its variables)
 
-# 3. Install dependencies, build the shared contracts, and run the Prisma migrations
+# 3. Install dependencies, build the shared contracts, run the Prisma migrations, and apply the rag-service migrations
 pnpm run setup
 
-# 4. Run the rag-service migrations
-uv run --directory apps/rag-service alembic upgrade head
-
-# 5. Start every service in a single terminal
+# 4. Start every service in a single terminal
 pnpm dev
 ```
 
