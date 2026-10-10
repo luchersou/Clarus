@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "Document" ADD COLUMN     "failureReason" TEXT;
+ALTER TABLE "documents"."Document" ADD COLUMN     "failureReason" TEXT;
