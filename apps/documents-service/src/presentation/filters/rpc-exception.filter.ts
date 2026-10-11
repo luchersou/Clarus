@@ -1,30 +1,28 @@
-import { Catch, NotFoundException } from "@nestjs/common";
-import { BaseRpcExceptionFilter } from "@nestjs/microservices";
-import { Observable, of } from "rxjs";
+import { Catch, NotFoundException, type ExceptionFilter } from "@nestjs/common";
 import { ZodError } from "zod";
 
 @Catch()
-export class RpcExceptionFilter extends BaseRpcExceptionFilter {
-  catch(exception: unknown): Observable<any> {
+export class RpcExceptionFilter implements ExceptionFilter {
+  catch(exception: unknown) {
     if (exception instanceof ZodError) {
-      return of({
+      return {
         error: "VALIDATION_ERROR",
         message: "Invalid payload",
         details: exception.issues,
-      });
+      };
     }
 
     if (exception instanceof NotFoundException) {
-      return of({
+      return {
         error: "NOT_FOUND",
         message: exception.message,
-      });
+      };
     }
 
     console.error("Unhandled error in RPC handler: ", exception);
-    return of({
+    return {
       error: "INTERNAL_ERROR",
       message: "Internal error while processing the request",
-    });
+    };
   }
 }
