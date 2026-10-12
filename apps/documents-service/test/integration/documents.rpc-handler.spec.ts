@@ -125,47 +125,47 @@ describe("documents RPC handlers (Real Postgres + RabbitMQ)", () => {
   });
 
   it("documents.get-by-id answers NOT_FOUND for another user's document, without leaking it", async () => {
-  const document = newDocument(USER_A, "secret.pdf");
-  await repository.save(document);
+    const document = newDocument(USER_A, "secret.pdf");
+    await repository.save(document);
 
-  const { data, text } = await call(RPC_ROUTING_KEYS.DOCUMENTS_GET_BY_ID, {
-    documentId: document.id,
-    userId: USER_B,
+    const { data, text } = await call(RPC_ROUTING_KEYS.DOCUMENTS_GET_BY_ID, {
+      documentId: document.id,
+      userId: USER_B,
+    });
+
+    expect(data).toMatchObject({ error: "NOT_FOUND" });
+    expect(text).not.toContain("secret.pdf");
   });
 
-  expect(data).toMatchObject({ error: "NOT_FOUND" });
-  expect(text).not.toContain("secret.pdf");
-});
+  it("documents.delete does not delete another user's document", async () => {
+    const document = newDocument(USER_A, "mine.pdf");
+    await repository.save(document);
 
-it("documents.delete does not delete another user's document", async () => {
-  const document = newDocument(USER_A, "mine.pdf");
-  await repository.save(document);
+    const { data } = await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, {
+      documentId: document.id,
+      userId: USER_B,
+    });
 
-  const { data } = await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, {
-    documentId: document.id,
-    userId: USER_B,
+    expect(data).toMatchObject({ error: "NOT_FOUND" });
+    const row = await prisma.document.findUnique({ where: { id: document.id } });
+    expect(row?.deletedAt).toBeNull();
   });
 
-  expect(data).toMatchObject({ error: "NOT_FOUND" });
-  const row = await prisma.document.findUnique({ where: { id: document.id } });
-  expect(row?.deletedAt).toBeNull();
-});
+  it("documents.delete on an already-deleted document answers NOT_FOUND", async () => {
+    const document = newDocument(USER_A, "twice.pdf");
+    await repository.save(document);
+    const payload = { documentId: document.id, userId: USER_A };
 
-it("documents.delete on an already-deleted document answers NOT_FOUND", async () => {
-  const document = newDocument(USER_A, "twice.pdf");
-  await repository.save(document);
-  const payload = { documentId: document.id, userId: USER_A };
+    await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, payload);
+    const { data } = await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, payload);
 
-  await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, payload);
-  const { data } = await call(RPC_ROUTING_KEYS.DOCUMENTS_DELETE, payload);
+    expect(data).toMatchObject({ error: "NOT_FOUND" });
+  });
 
-  expect(data).toMatchObject({ error: "NOT_FOUND" });
-});
+  it("rejects a malformed payload with VALIDATION_ERROR", async () => {
+    const { data, text } = await call(RPC_ROUTING_KEYS.DOCUMENTS_LIST, {});
 
-it("rejects a malformed payload with VALIDATION_ERROR", async () => {
-  const { data, text } = await call(RPC_ROUTING_KEYS.DOCUMENTS_LIST, {});
-
-  expect(data).toMatchObject({ error: "VALIDATION_ERROR" });
-  expect(text).toContain("userId");
-});
+    expect(data).toMatchObject({ error: "VALIDATION_ERROR" });
+    expect(text).toContain("userId");
+  });
 });

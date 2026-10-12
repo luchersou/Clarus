@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { RabbitSubscribe } from "@golevelup/nestjs-rabbitmq";
-import { QUEUES, EXCHANGES, ROUTING_KEYS } from "@clarus/event-contracts";
+import { defaultNackErrorHandler, RabbitSubscribe } from "@golevelup/nestjs-rabbitmq";
+import { QUEUES, EXCHANGES, ROUTING_KEYS, DocumentEmbeddingFailedSchema } from "@clarus/event-contracts";
 import { MarkDocumentFailedUseCase } from "../../../application/mark-document-failed.use-case.js";
 
 @Injectable()
@@ -12,8 +12,10 @@ export class DocumentEmbeddingFailedListener {
     routingKey: ROUTING_KEYS.DOCUMENT_EMBEDDING_FAILED,
     queue: QUEUES.DOCUMENTS_DOCUMENT_EMBEDDING_FAILED, 
     queueOptions: { deadLetterExchange: EXCHANGES.DLX },
+    errorHandler: defaultNackErrorHandler,
   })
-  async handle(payload: { documentId: string; reason: string }) {
-    await this.useCase.execute({ documentId: payload.documentId, reason: payload.reason });
+  async handle(payload: unknown) {
+    const event = DocumentEmbeddingFailedSchema.parse(payload);
+    await this.useCase.execute({ documentId: event.documentId, reason: event.reason });
   }
 }

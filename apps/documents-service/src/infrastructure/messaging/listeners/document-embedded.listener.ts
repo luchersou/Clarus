@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { RabbitSubscribe } from "@golevelup/nestjs-rabbitmq";
+import { defaultNackErrorHandler, RabbitSubscribe } from "@golevelup/nestjs-rabbitmq";
 import {
   EXCHANGES,
   ROUTING_KEYS,
@@ -17,6 +17,7 @@ export class DocumentEmbeddedListener {
     routingKey: ROUTING_KEYS.DOCUMENT_EMBEDDED,
     queue: QUEUES.DOCUMENTS_DOCUMENT_EMBEDDED,
     queueOptions: { deadLetterExchange: EXCHANGES.DLX },
+    errorHandler: defaultNackErrorHandler,
   })
   async handle(payload: unknown) {
     const event = DocumentEmbeddedSchema.parse(payload);
