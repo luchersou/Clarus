@@ -1,16 +1,16 @@
 -- CreateEnum
-CREATE TYPE "AnalysisType" AS ENUM ('SUMMARY', 'EXTRACT_VALUES', 'DEADLINES', 'COMPARE');
+CREATE TYPE "analysis"."AnalysisType" AS ENUM ('SUMMARY', 'EXTRACT_VALUES', 'DEADLINES', 'COMPARE');
 
 -- CreateEnum
-CREATE TYPE "AnalysisStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
+CREATE TYPE "analysis"."AnalysisStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 
 -- CreateTable
-CREATE TABLE "Analysis" (
+CREATE TABLE "analysis"."Analysis" (
     "id" TEXT NOT NULL,
     "documentId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "type" "AnalysisType" NOT NULL,
-    "status" "AnalysisStatus" NOT NULL DEFAULT 'PENDING',
+    "type" "analysis"."AnalysisType" NOT NULL,
+    "status" "analysis"."AnalysisStatus" NOT NULL DEFAULT 'PENDING',
     "result" JSONB,
     "sourcePage" INTEGER,
     "confidence" DOUBLE PRECISION,
@@ -22,7 +22,7 @@ CREATE TABLE "Analysis" (
 );
 
 -- CreateIndex
-CREATE INDEX "Analysis_documentId_idx" ON "Analysis"("documentId");
+CREATE INDEX "Analysis_documentId_idx" ON "analysis"."Analysis"("documentId");
 
 -- CreateIndex
-CREATE INDEX "Analysis_userId_idx" ON "Analysis"("userId");
+CREATE INDEX "Analysis_userId_idx" ON "analysis"."Analysis"("userId");
