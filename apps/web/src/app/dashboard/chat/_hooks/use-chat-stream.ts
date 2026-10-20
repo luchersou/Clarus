@@ -122,6 +122,5 @@ export function useChatStream() {
     stopStreaming,
     isStreaming,
     error,
-    sessionId: sessionIdRef.current,
   };
 }

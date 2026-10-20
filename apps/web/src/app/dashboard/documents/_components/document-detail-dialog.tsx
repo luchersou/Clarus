@@ -32,6 +32,17 @@ interface DocumentDetail {
   url: string;
 }
 
+interface LoadedDocument {
+  id: string;
+  document: DocumentDetail | null;
+  error: string | null;
+}
+
+interface ActionError {
+  id: string;
+  message: string;
+}
+
 interface DocumentDetailDialogProps {
   documentId: string | null;
   open: boolean;
@@ -50,31 +61,45 @@ export function DocumentDetailDialog({
   open,
   onOpenChange,
 }: DocumentDetailDialogProps) {
-  const [document, setDocument] = useState<DocumentDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loaded, setLoaded] = useState<LoadedDocument | null>(null);
+  const [actionError, setActionError] = useState<ActionError | null>(null);
   const [pendingType, setPendingType] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   useEffect(() => {
-    if (!documentId || !open) {
-      setDocument(null);
-      setError(null);
-      return;
-    }
+    if (!documentId || !open) return;
 
-    setIsLoading(true);
+    // descarta respostas de um documento que já não está selecionado
+    let cancelled = false;
     getDocumentByIdAction(documentId)
-      .then(setDocument)
-      .catch(() => setError("Unable to load document details."))
-      .finally(() => setIsLoading(false));
+      .then((document) => {
+        if (!cancelled) setLoaded({ id: documentId, document, error: null });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoaded({
+            id: documentId,
+            document: null,
+            error: "Unable to load document details.",
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [documentId, open]);
+
+  const current = loaded?.id === documentId ? loaded : null;
+  const document = current?.document ?? null;
+  const loadError = current?.error ?? null;
+  const error = actionError?.id === documentId ? actionError.message : null;
 
   const handleRequestAnalysis = (type: string) => {
     if (!document) return;
 
-    setError(null);
+    setActionError(null);
     setPendingType(type);
 
     startTransition(async () => {
@@ -83,7 +108,10 @@ export function DocumentDetailDialog({
         onOpenChange(false);
         router.push(`/dashboard/analyses?documentId=${document.id}`);
       } catch {
-        setError("Unable to start analysis. Please try again.");
+        setActionError({
+          id: document.id,
+          message: "Unable to start analysis. Please try again.",
+        });
       } finally {
         setPendingType(null);
       }
@@ -93,7 +121,17 @@ export function DocumentDetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-        {isLoading || !document ? (
+        {loadError ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Document details</DialogTitle>
+            </DialogHeader>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{loadError}</AlertDescription>
+            </Alert>
+          </>
+        ) : !document ? (
           <div className="flex h-40 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>

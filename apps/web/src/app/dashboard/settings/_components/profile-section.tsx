@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 import { updateProfileAction } from "@/app/dashboard/settings/actions";
@@ -17,12 +17,13 @@ export function ProfileSection() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [syncedUser, setSyncedUser] = useState(user);
 
-  useEffect(() => {
-    if (user) {
-      setFullName(user.user_metadata?.full_name ?? "");
-    }
-  }, [user]);
+  // preenche o formulário quando o usuário carrega ou muda
+  if (user !== syncedUser) {
+    setSyncedUser(user);
+    if (user) setFullName(user.user_metadata?.full_name ?? "");
+  }
 
   const avatarUrl = user?.user_metadata?.avatar_url ?? "";
   const initials = fullName

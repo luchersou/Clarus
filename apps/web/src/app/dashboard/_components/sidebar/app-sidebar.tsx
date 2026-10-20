@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 import Logo from "@/app/dashboard/_components/sidebar/logo";
 import { NavMain } from "@/app/dashboard/_components/sidebar/nav-main";
@@ -25,12 +25,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const isTablet = useIsTablet();
 
-  useEffect(() => {
+  // setOpen muda de identidade a cada toggle; como dependência, reabriria o sidebar sozinho
+  const closeMobileSidebar = useEffectEvent(() => {
     if (isMobile) setOpenMobile(false);
+  });
+  const syncSidebarWithTablet = useEffectEvent((tablet: boolean) => {
+    setOpen(!tablet);
+  });
+
+  useEffect(() => {
+    closeMobileSidebar();
   }, [pathname]);
 
   useEffect(() => {
-    setOpen(!isTablet);
+    syncSidebarWithTablet(isTablet);
   }, [isTablet]);
 
   return (

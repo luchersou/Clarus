@@ -27,21 +27,28 @@ export function AnalysesListClient({
   documentId,
 }: AnalysesListClientProps) {
   const [analyses, setAnalyses] = useState(initialAnalyses);
+  const [prevInitialAnalyses, setPrevInitialAnalyses] = useState(initialAnalyses);
 
-  useEffect(() => {
+  // ressincroniza quando o server component envia uma nova lista
+  if (initialAnalyses !== prevInitialAnalyses) {
+    setPrevInitialAnalyses(initialAnalyses);
     setAnalyses(initialAnalyses);
-  }, [initialAnalyses]);
+  }
 
   useEffect(() => {
     const hasPending = analyses.some((a) => a.status === "PENDING");
     if (!hasPending) return;
 
+    let cancelled = false;
     const interval = setInterval(async () => {
       const data = await getAnalysesAction(documentId);
-      setAnalyses(data);
+      if (!cancelled) setAnalyses(data);
     }, POLL_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [analyses, documentId]);
 
   if (analyses.length === 0) {

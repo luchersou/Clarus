@@ -44,7 +44,7 @@ export function SessionsSection() {
       <div className="border-b border-border px-3 py-3 md:px-5 md:py-4">
         <h2 className="text-xs font-semibold tracking-tight md:text-sm">Sessions</h2>
         <p className="mt-1 text-[10px] text-muted-foreground md:text-xs">
-          Manage where you're currently signed in.
+          Manage where you&apos;re currently signed in.
         </p>
       </div>
 
@@ -76,8 +76,8 @@ export function SessionsSection() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Sign out of all devices?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  You'll be signed out everywhere, including this session.
-                  You'll need to log in again.
+                  You&apos;ll be signed out everywhere, including this session.
+                  You&apos;ll need to log in again.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
