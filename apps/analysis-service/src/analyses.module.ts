@@ -12,6 +12,7 @@ import { MarkAnalysisCompletedUseCase } from "./application/mark-analysis-comple
 import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.use-case.js";
 import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
 import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
+import { AnalysisRejectedListener } from "./infrastructure/messaging/listeners/analysis-rejected.listener.js";
 import { ExpireStaleAnalysesUseCase } from "./application/expire-stale-analyses.use-case.js";
 import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
 import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-timeout.scheduler.js";
@@ -34,6 +35,7 @@ import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-t
 
     AnalysisCompletedListener,
     AnalysisFailedListener,
+    AnalysisRejectedListener,
 
     OutboxRelay,
     AnalysisTimeoutScheduler,
