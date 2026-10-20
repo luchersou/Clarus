@@ -43,3 +43,15 @@ enum AnalysisStatus {
 
   @@schema("analysis")
 }
+model OutboxEvent {
+  id          String    @id @default(uuid())
+  routingKey  String
+  payload     Json
+  attempts    Int       @default(0)
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
+
+  @@index([publishedAt, createdAt])
+  @@schema("analysis")
+}

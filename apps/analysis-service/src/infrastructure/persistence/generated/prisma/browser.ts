@@ -22,3 +22,8 @@ export * from './enums.js';
  * 
  */
 export type Analysis = Prisma.AnalysisModel
+/**
+ * Model OutboxEvent
+ * 
+ */
+export type OutboxEvent = Prisma.OutboxEventModel
