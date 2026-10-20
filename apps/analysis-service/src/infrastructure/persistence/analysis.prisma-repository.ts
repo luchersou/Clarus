@@ -4,6 +4,7 @@ import { PrismaService } from "./prisma.service.js";
 import { Analysis } from "../../domain/analysis.entity.js";
 import type { AnalysisRepository } from "../../domain/analysis.repository.js";
 import type { AnalysisDomainEvent } from "../../domain/analysis-events.js";
+import { AnalysisConcurrencyError } from "../../domain/errors/analysis-concurrency.error.js";
 import { Prisma } from "./generated/prisma/client.js";
 import type { Analysis as PrismaAnalysis } from "./generated/prisma/client.js"; 
 
@@ -15,15 +16,25 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
     const data = this.toPersistence(analysis);
     const outboxEvents = analysis.pullEvents().map((event) => this.toOutboxEvent(event));
 
+    const persistedStatus = analysis.persistedStatus;
+
     // the analysis and its events are stored atomically; OutboxRelay publishes the events
-    await this.prisma.$transaction([
-      this.prisma.analysis.upsert({
-        where: { id: analysis.id },
-        create: data,
-        update: data,
-      }),
-      this.prisma.outboxEvent.createMany({ data: outboxEvents }),
-    ]);
+    await this.prisma.$transaction(async (tx) => {
+      if (persistedStatus === null) {
+        await tx.analysis.create({ data });
+      } else {
+        // optimistic check: someone else may have moved the status since it was loaded
+        const { count } = await tx.analysis.updateMany({
+          where: { id: analysis.id, status: persistedStatus },
+          data,
+        });
+        if (count === 0) throw new AnalysisConcurrencyError(analysis.id);
+      }
+
+      if (outboxEvents.length > 0) {
+        await tx.outboxEvent.createMany({ data: outboxEvents });
+      }
+    });
   }
 
   async findById(analysisId: string): Promise<Analysis | null> {

@@ -22,7 +22,11 @@ export interface AnalysisProps {
 export class Analysis {
   private events: AnalysisDomainEvent[] = [];
 
-  private constructor(private props: AnalysisProps) {}
+  /** Status as last read from storage; null for an analysis that was never saved. */
+  private constructor(
+    private props: AnalysisProps,
+    private readonly loadedStatus: AnalysisStatus | null,
+  ) {}
 
   static create(input: {
     documentId: string;
@@ -30,7 +34,8 @@ export class Analysis {
     type: AnalysisType;
   }): Analysis {
     const now = new Date();
-    const analysis = new Analysis({
+    const analysis = new Analysis(
+      {
       id: randomUUID(),
       documentId: input.documentId,
       userId: input.userId,
@@ -43,7 +48,9 @@ export class Analysis {
       createdAt: now,
       updatedAt: now,
 			deletedAt: null,
-    });
+      },
+      null,
+    );
 
     analysis.events.push({
       name: "AnalysisRequested",
@@ -57,7 +64,7 @@ export class Analysis {
   }
 
   static reconstruct(props: AnalysisProps): Analysis {
-    return new Analysis(props);
+    return new Analysis(props, props.status);
   }
 
   /** Returns the events recorded since the last call and clears them. */
@@ -97,6 +104,10 @@ export class Analysis {
 		if (this.props.deletedAt) return;
 		this.props.deletedAt = new Date();
 	}
+
+  get persistedStatus(): AnalysisStatus | null {
+    return this.loadedStatus;
+  }
 
   get id() {
     return this.props.id;

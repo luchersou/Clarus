@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ANALYSIS_REPOSITORY, type AnalysisRepository } from "../domain/analysis.repository.js";
+import { AnalysisConcurrencyError } from "../domain/errors/analysis-concurrency.error.js";
 
 export interface MarkAnalysisCompletedInput {
   analysisId: string;
@@ -40,6 +41,13 @@ export class MarkAnalysisCompletedUseCase {
       confidence: input.confidence,
     });
 
-    await this.analysisRepository.save(analysis);
+    try {
+      await this.analysisRepository.save(analysis);
+    } catch (error) {
+      if (!(error instanceof AnalysisConcurrencyError)) throw error;
+      this.logger.warn(
+        `Analysis ${input.analysisId} changed status concurrently — ignoring analysis.completed`,
+      );
+    }
   }
 }
