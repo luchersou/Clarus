@@ -22,6 +22,12 @@ export class AnalysesController {
     return this.analysesService.list(user.id, documentId);
   }
 
+  // declared before ":id" so "quota" isn't captured as an id
+  @Get("quota")
+  async quota(@CurrentUser() user: AuthenticatedUser) {
+    return this.analysesService.quota(user.id);
+  }
+
   @Get(":id")
   async getById(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.analysesService.getById(id, user.id);

@@ -44,6 +44,15 @@ export class AnalysesService {
     }
   }
 
+  async quota(userId: string): Promise<unknown> {
+    try {
+      const response = await this.rpcClient.request(RPC_ROUTING_KEYS.ANALYSES_QUOTA, { userId });
+      return mapRpcResponse(response);
+    } catch (error) {
+      mapInfrastructureError(error);
+    }
+  }
+
   async delete(analysisId: string, userId: string): Promise<unknown> {
     try {
       const response = await this.rpcClient.request(RPC_ROUTING_KEYS.ANALYSES_DELETE, {

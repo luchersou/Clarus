@@ -1,5 +1,8 @@
 import {
   BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
   InternalServerErrorException,
   NotFoundException,
   ServiceUnavailableException,
@@ -14,6 +17,10 @@ export function mapRpcResponse<T>(response: T | RpcErrorResponse): T {
     switch (response.error) {
       case "NOT_FOUND":
         throw new NotFoundException(response.message);
+      case "CONFLICT":
+        throw new ConflictException(response.message);
+      case "QUOTA_EXCEEDED":
+        throw new HttpException(response.message, HttpStatus.TOO_MANY_REQUESTS);
       case "VALIDATION_ERROR":
         throw new BadRequestException({
           message: response.message,
