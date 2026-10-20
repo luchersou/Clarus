@@ -4,6 +4,7 @@ import { PrismaService } from "./prisma.service.js";
 import { Analysis } from "../../domain/analysis.entity.js";
 import type { AnalysisRepository } from "../../domain/analysis.repository.js";
 import type { AnalysisDomainEvent } from "../../domain/analysis-events.js";
+import type { AnalysisType } from "../../domain/analysis-type.js";
 import { AnalysisConcurrencyError } from "../../domain/errors/analysis-concurrency.error.js";
 import { Prisma } from "./generated/prisma/client.js";
 import type { Analysis as PrismaAnalysis } from "./generated/prisma/client.js"; 
@@ -54,6 +55,13 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
       orderBy: { createdAt: "desc" },
     });
     return records.map((record) => this.toDomain(record));
+  }
+
+  async hasPending(userId: string, documentId: string, type: AnalysisType): Promise<boolean> {
+    const count = await this.prisma.analysis.count({
+      where: { userId, documentId, type, status: "PENDING", deletedAt: null },
+    });
+    return count > 0;
   }
 
   async findPendingCreatedBefore(cutoff: Date, limit: number): Promise<Analysis[]> {

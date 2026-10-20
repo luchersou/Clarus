@@ -3,6 +3,7 @@ import { Analysis } from "../domain/analysis.entity.js";
 import type { AnalysisType } from "../domain/analysis-type.js";
 import { ANALYSIS_REPOSITORY, type AnalysisRepository } from "../domain/analysis.repository.js";
 import { AnalysisQuotaExceededError } from "../domain/errors/analysis-quota-exceeded.error.js";
+import { DuplicateAnalysisError } from "../domain/errors/duplicate-analysis.error.js";
 import { ANALYSIS_QUOTA_POLICY, type AnalysisQuotaPolicy, quotaWindow } from "./analysis-quota.js";
 
 export interface RequestAnalysisInput {
@@ -21,6 +22,10 @@ export class RequestAnalysisUseCase {
   ) {}
 
   async execute(input: RequestAnalysisInput): Promise<Analysis> {
+    if (await this.analysisRepository.hasPending(input.userId, input.documentId, input.type)) {
+      throw new DuplicateAnalysisError(input.documentId, input.type);
+    }
+
     // Soft limit: two requests racing at the very last credit can both pass.
     const { start } = quotaWindow(new Date());
     const used = await this.analysisRepository.countCreditsInUse(input.userId, start);
