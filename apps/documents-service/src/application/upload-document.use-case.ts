@@ -52,7 +52,7 @@ export class UploadDocumentUseCase {
 
     await this.documentRepository.save(document);
 
-    this.eventPublisher.publishDocumentUploaded({
+    await this.eventPublisher.publishDocumentUploaded({
       documentId: document.id,
       userId: document.userId,
       storageUrl: document.storageUrl,

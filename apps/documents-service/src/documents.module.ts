@@ -17,6 +17,8 @@ import { MarkDocumentProcessedUseCase } from "./application/mark-document-proces
 import { MarkDocumentFailedUseCase } from "./application/mark-document-failed.use-case.js";
 import { DocumentEmbeddedListener } from "./infrastructure/messaging/listeners/document-embedded.listener.js";
 import { DocumentEmbeddingFailedListener } from "./infrastructure/messaging/listeners/document-embedding-failed.listener.js";
+import { ValidateAnalysisRequestUseCase } from "./application/validate-analysis-request.use-case.js";
+import { AnalysisRequestedListener } from "./infrastructure/messaging/listeners/analysis-requested.listener.js";
 
 @Module({
   imports: [PrismaModule, MessagingModule],
@@ -31,9 +33,11 @@ import { DocumentEmbeddingFailedListener } from "./infrastructure/messaging/list
     DeleteDocumentUseCase,
     MarkDocumentProcessedUseCase,
     MarkDocumentFailedUseCase,
+    ValidateAnalysisRequestUseCase,
     DocumentsRpcHandler,
     DocumentEmbeddedListener,
     DocumentEmbeddingFailedListener,
+    AnalysisRequestedListener,
   ],
 })
 export class DocumentsModule {}

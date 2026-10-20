@@ -7,8 +7,22 @@ export interface DocumentUploadedPayload {
   fileType: FileType;
 }
 
+export interface AnalysisDocumentValidatedPayload {
+  analysisId: string;
+  documentId: string;
+  userId: string;
+  type: "SUMMARY" | "EXTRACT_VALUES" | "DEADLINES" | "COMPARE";
+}
+
+export interface AnalysisRejectedPayload {
+  analysisId: string;
+  reason: string;
+}
+
 export interface DocumentEventPublisherPort {
-  publishDocumentUploaded(payload: DocumentUploadedPayload): void;
+  publishDocumentUploaded(payload: DocumentUploadedPayload): Promise<void>;
+  publishAnalysisDocumentValidated(payload: AnalysisDocumentValidatedPayload): Promise<void>;
+  publishAnalysisRejected(payload: AnalysisRejectedPayload): Promise<void>;
 }
 
 export const DOCUMENT_EVENT_PUBLISHER = Symbol("DOCUMENT_EVENT_PUBLISHER");
