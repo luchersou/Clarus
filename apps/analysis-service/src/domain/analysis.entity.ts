@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { AnalysisDomainEvent } from "./analysis-events.js";
 import type { AnalysisStatus } from "./analysis-status.js";
 import type { AnalysisType } from "./analysis-type.js";
+import type { CreditStatus } from "./credit-status.js";
 import { InvalidAnalysisTransitionError } from "./errors/invalid-analysis-transition.error.js";
 
 export interface AnalysisProps {
@@ -10,6 +11,7 @@ export interface AnalysisProps {
   userId: string;
   type: AnalysisType;
   status: AnalysisStatus;
+  creditStatus: CreditStatus;
   result: Record<string, unknown> | null;
   sourcePage: number | null;
   confidence: number | null;
@@ -41,6 +43,7 @@ export class Analysis {
       userId: input.userId,
       type: input.type,
       status: "PENDING",
+      creditStatus: "RESERVED",
       result: null,
       sourcePage: null,
       confidence: null,
@@ -84,6 +87,7 @@ export class Analysis {
     }
 
     this.props.status = "COMPLETED";
+    this.props.creditStatus = "CONSUMED";
     this.props.result = input.result;
     this.props.sourcePage = input.sourcePage ?? null;
     this.props.confidence = input.confidence ?? null;
@@ -96,6 +100,8 @@ export class Analysis {
     }
 
     this.props.status = "FAILED";
+    // compensation: a failed analysis gives its credit back
+    this.props.creditStatus = "REFUNDED";
     this.props.failureReason = reason;
     this.props.updatedAt = new Date();
   }
@@ -103,6 +109,8 @@ export class Analysis {
 	delete(): void {
 		if (this.props.deletedAt) return;
 		this.props.deletedAt = new Date();
+		// a pending analysis that is deleted will never complete, so its credit is released
+		if (this.props.creditStatus === "RESERVED") this.props.creditStatus = "REFUNDED";
 	}
 
   get persistedStatus(): AnalysisStatus | null {
@@ -123,6 +131,9 @@ export class Analysis {
   }
   get status() {
     return this.props.status;
+  }
+  get creditStatus() {
+    return this.props.creditStatus;
   }
   get result() {
     return this.props.result;

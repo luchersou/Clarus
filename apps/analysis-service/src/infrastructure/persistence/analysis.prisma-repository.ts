@@ -65,6 +65,16 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
     return records.map((record) => this.toDomain(record));
   }
 
+  async countCreditsInUse(userId: string, since: Date): Promise<number> {
+    return this.prisma.analysis.count({
+      where: {
+        userId,
+        createdAt: { gte: since },
+        creditStatus: { in: ["RESERVED", "CONSUMED"] },
+      },
+    });
+  }
+
   private toPersistence(analysis: Analysis): Prisma.AnalysisUncheckedCreateInput {
 		return {
 			id: analysis.id,
@@ -72,6 +82,7 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
 			userId: analysis.userId,
 			type: analysis.type as Prisma.AnalysisUncheckedCreateInput["type"],
 			status: analysis.status as Prisma.AnalysisUncheckedCreateInput["status"],
+			creditStatus: analysis.creditStatus,
 			result: (analysis.result ?? Prisma.JsonNull) as Prisma.InputJsonValue,
 			sourcePage: analysis.sourcePage,
 			confidence: analysis.confidence,
@@ -104,6 +115,7 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
       userId: record.userId,
       type: record.type as Analysis["type"],
       status: record.status as Analysis["status"],
+      creditStatus: record.creditStatus,
       result: (record.result as Record<string, unknown> | null) ?? null,
       sourcePage: record.sourcePage,
       confidence: record.confidence,

@@ -42,6 +42,7 @@ export type AnalysisMinAggregateOutputType = {
   userId: string | null
   type: $Enums.AnalysisType | null
   status: $Enums.AnalysisStatus | null
+  creditStatus: $Enums.CreditStatus | null
   sourcePage: number | null
   confidence: number | null
   failureReason: string | null
@@ -56,6 +57,7 @@ export type AnalysisMaxAggregateOutputType = {
   userId: string | null
   type: $Enums.AnalysisType | null
   status: $Enums.AnalysisStatus | null
+  creditStatus: $Enums.CreditStatus | null
   sourcePage: number | null
   confidence: number | null
   failureReason: string | null
@@ -70,6 +72,7 @@ export type AnalysisCountAggregateOutputType = {
   userId: number
   type: number
   status: number
+  creditStatus: number
   result: number
   sourcePage: number
   confidence: number
@@ -97,6 +100,7 @@ export type AnalysisMinAggregateInputType = {
   userId?: true
   type?: true
   status?: true
+  creditStatus?: true
   sourcePage?: true
   confidence?: true
   failureReason?: true
@@ -111,6 +115,7 @@ export type AnalysisMaxAggregateInputType = {
   userId?: true
   type?: true
   status?: true
+  creditStatus?: true
   sourcePage?: true
   confidence?: true
   failureReason?: true
@@ -125,6 +130,7 @@ export type AnalysisCountAggregateInputType = {
   userId?: true
   type?: true
   status?: true
+  creditStatus?: true
   result?: true
   sourcePage?: true
   confidence?: true
@@ -227,6 +233,7 @@ export type AnalysisGroupByOutputType = {
   userId: string
   type: $Enums.AnalysisType
   status: $Enums.AnalysisStatus
+  creditStatus: $Enums.CreditStatus
   result: runtime.JsonValue | null
   sourcePage: number | null
   confidence: number | null
@@ -265,6 +272,7 @@ export type AnalysisWhereInput = {
   userId?: Prisma.StringFilter<"Analysis"> | string
   type?: Prisma.EnumAnalysisTypeFilter<"Analysis"> | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFilter<"Analysis"> | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFilter<"Analysis"> | $Enums.CreditStatus
   result?: Prisma.JsonNullableFilter<"Analysis">
   sourcePage?: Prisma.IntNullableFilter<"Analysis"> | number | null
   confidence?: Prisma.FloatNullableFilter<"Analysis"> | number | null
@@ -280,6 +288,7 @@ export type AnalysisOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  creditStatus?: Prisma.SortOrder
   result?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePage?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -298,6 +307,7 @@ export type AnalysisWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Analysis"> | string
   type?: Prisma.EnumAnalysisTypeFilter<"Analysis"> | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFilter<"Analysis"> | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFilter<"Analysis"> | $Enums.CreditStatus
   result?: Prisma.JsonNullableFilter<"Analysis">
   sourcePage?: Prisma.IntNullableFilter<"Analysis"> | number | null
   confidence?: Prisma.FloatNullableFilter<"Analysis"> | number | null
@@ -313,6 +323,7 @@ export type AnalysisOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  creditStatus?: Prisma.SortOrder
   result?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePage?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -336,6 +347,7 @@ export type AnalysisScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Analysis"> | string
   type?: Prisma.EnumAnalysisTypeWithAggregatesFilter<"Analysis"> | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusWithAggregatesFilter<"Analysis"> | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusWithAggregatesFilter<"Analysis"> | $Enums.CreditStatus
   result?: Prisma.JsonNullableWithAggregatesFilter<"Analysis">
   sourcePage?: Prisma.IntNullableWithAggregatesFilter<"Analysis"> | number | null
   confidence?: Prisma.FloatNullableWithAggregatesFilter<"Analysis"> | number | null
@@ -351,6 +363,7 @@ export type AnalysisCreateInput = {
   userId: string
   type: $Enums.AnalysisType
   status?: $Enums.AnalysisStatus
+  creditStatus?: $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: number | null
   confidence?: number | null
@@ -366,6 +379,7 @@ export type AnalysisUncheckedCreateInput = {
   userId: string
   type: $Enums.AnalysisType
   status?: $Enums.AnalysisStatus
+  creditStatus?: $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: number | null
   confidence?: number | null
@@ -381,6 +395,7 @@ export type AnalysisUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAnalysisTypeFieldUpdateOperationsInput | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFieldUpdateOperationsInput | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFieldUpdateOperationsInput | $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -396,6 +411,7 @@ export type AnalysisUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAnalysisTypeFieldUpdateOperationsInput | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFieldUpdateOperationsInput | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFieldUpdateOperationsInput | $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -411,6 +427,7 @@ export type AnalysisCreateManyInput = {
   userId: string
   type: $Enums.AnalysisType
   status?: $Enums.AnalysisStatus
+  creditStatus?: $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: number | null
   confidence?: number | null
@@ -426,6 +443,7 @@ export type AnalysisUpdateManyMutationInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAnalysisTypeFieldUpdateOperationsInput | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFieldUpdateOperationsInput | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFieldUpdateOperationsInput | $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -441,6 +459,7 @@ export type AnalysisUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAnalysisTypeFieldUpdateOperationsInput | $Enums.AnalysisType
   status?: Prisma.EnumAnalysisStatusFieldUpdateOperationsInput | $Enums.AnalysisStatus
+  creditStatus?: Prisma.EnumCreditStatusFieldUpdateOperationsInput | $Enums.CreditStatus
   result?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sourcePage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -456,6 +475,7 @@ export type AnalysisCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  creditStatus?: Prisma.SortOrder
   result?: Prisma.SortOrder
   sourcePage?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
@@ -476,6 +496,7 @@ export type AnalysisMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  creditStatus?: Prisma.SortOrder
   sourcePage?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
   failureReason?: Prisma.SortOrder
@@ -490,6 +511,7 @@ export type AnalysisMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  creditStatus?: Prisma.SortOrder
   sourcePage?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
   failureReason?: Prisma.SortOrder
@@ -513,6 +535,10 @@ export type EnumAnalysisTypeFieldUpdateOperationsInput = {
 
 export type EnumAnalysisStatusFieldUpdateOperationsInput = {
   set?: $Enums.AnalysisStatus
+}
+
+export type EnumCreditStatusFieldUpdateOperationsInput = {
+  set?: $Enums.CreditStatus
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -551,6 +577,7 @@ export type AnalysisSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   userId?: boolean
   type?: boolean
   status?: boolean
+  creditStatus?: boolean
   result?: boolean
   sourcePage?: boolean
   confidence?: boolean
@@ -566,6 +593,7 @@ export type AnalysisSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   userId?: boolean
   type?: boolean
   status?: boolean
+  creditStatus?: boolean
   result?: boolean
   sourcePage?: boolean
   confidence?: boolean
@@ -581,6 +609,7 @@ export type AnalysisSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   userId?: boolean
   type?: boolean
   status?: boolean
+  creditStatus?: boolean
   result?: boolean
   sourcePage?: boolean
   confidence?: boolean
@@ -596,6 +625,7 @@ export type AnalysisSelectScalar = {
   userId?: boolean
   type?: boolean
   status?: boolean
+  creditStatus?: boolean
   result?: boolean
   sourcePage?: boolean
   confidence?: boolean
@@ -605,7 +635,7 @@ export type AnalysisSelectScalar = {
   deletedAt?: boolean
 }
 
-export type AnalysisOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentId" | "userId" | "type" | "status" | "result" | "sourcePage" | "confidence" | "failureReason" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["analysis"]>
+export type AnalysisOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentId" | "userId" | "type" | "status" | "creditStatus" | "result" | "sourcePage" | "confidence" | "failureReason" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["analysis"]>
 
 export type $AnalysisPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Analysis"
@@ -616,6 +646,7 @@ export type $AnalysisPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     userId: string
     type: $Enums.AnalysisType
     status: $Enums.AnalysisStatus
+    creditStatus: $Enums.CreditStatus
     result: runtime.JsonValue | null
     sourcePage: number | null
     confidence: number | null
@@ -1051,6 +1082,7 @@ export interface AnalysisFieldRefs {
   readonly userId: Prisma.FieldRef<"Analysis", 'String'>
   readonly type: Prisma.FieldRef<"Analysis", 'AnalysisType'>
   readonly status: Prisma.FieldRef<"Analysis", 'AnalysisStatus'>
+  readonly creditStatus: Prisma.FieldRef<"Analysis", 'CreditStatus'>
   readonly result: Prisma.FieldRef<"Analysis", 'Json'>
   readonly sourcePage: Prisma.FieldRef<"Analysis", 'Int'>
   readonly confidence: Prisma.FieldRef<"Analysis", 'Float'>

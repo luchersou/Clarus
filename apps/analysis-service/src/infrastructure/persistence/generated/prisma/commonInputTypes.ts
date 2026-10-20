@@ -43,6 +43,13 @@ export type EnumAnalysisStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel> | $Enums.AnalysisStatus
 }
 
+export type EnumCreditStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreditStatus | Prisma.EnumCreditStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel> | $Enums.CreditStatus
+}
+
 export type JsonNullableFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -167,6 +174,16 @@ export type EnumAnalysisStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel>
+}
+
+export type EnumCreditStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreditStatus | Prisma.EnumCreditStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreditStatusWithAggregatesFilter<$PrismaModel> | $Enums.CreditStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel>
 }
 
 export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
@@ -380,6 +397,13 @@ export type NestedEnumAnalysisStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel> | $Enums.AnalysisStatus
 }
 
+export type NestedEnumCreditStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreditStatus | Prisma.EnumCreditStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel> | $Enums.CreditStatus
+}
+
 export type NestedIntNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -484,6 +508,16 @@ export type NestedEnumAnalysisStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAnalysisStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCreditStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CreditStatus | Prisma.EnumCreditStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CreditStatus[] | Prisma.ListEnumCreditStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCreditStatusWithAggregatesFilter<$PrismaModel> | $Enums.CreditStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCreditStatusFilter<$PrismaModel>
 }
 
 export type NestedJsonNullableFilter<$PrismaModel = never> =

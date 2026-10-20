@@ -611,6 +611,7 @@ export const AnalysisScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
   status: 'status',
+  creditStatus: 'creditStatus',
   result: 'result',
   sourcePage: 'sourcePage',
   confidence: 'confidence',
@@ -729,6 +730,20 @@ export type EnumAnalysisStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'AnalysisStatus[]'
  */
 export type ListEnumAnalysisStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AnalysisStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CreditStatus'
+ */
+export type EnumCreditStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CreditStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CreditStatus[]'
+ */
+export type ListEnumCreditStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CreditStatus[]'>
     
 
 

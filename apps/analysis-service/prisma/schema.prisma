@@ -14,6 +14,7 @@ model Analysis {
   userId        String
   type          AnalysisType
   status        AnalysisStatus @default(PENDING)
+  creditStatus  CreditStatus   @default(RESERVED)
   result        Json?
   sourcePage    Int?
   confidence    Float?
@@ -24,6 +25,7 @@ model Analysis {
 
   @@index([documentId])
   @@index([userId])
+  @@index([userId, createdAt])
   @@schema("analysis")
 }
 
@@ -32,6 +34,14 @@ enum AnalysisType {
   EXTRACT_VALUES
   DEADLINES
   COMPARE
+
+  @@schema("analysis")
+}
+
+enum CreditStatus {
+  RESERVED
+  CONSUMED
+  REFUNDED
 
   @@schema("analysis")
 }

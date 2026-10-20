@@ -77,6 +77,7 @@ export const AnalysisScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
   status: 'status',
+  creditStatus: 'creditStatus',
   result: 'result',
   sourcePage: 'sourcePage',
   confidence: 'confidence',

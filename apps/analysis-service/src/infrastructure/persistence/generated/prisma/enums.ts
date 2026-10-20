@@ -19,6 +19,15 @@ export const AnalysisType = {
 export type AnalysisType = (typeof AnalysisType)[keyof typeof AnalysisType]
 
 
+export const CreditStatus = {
+  RESERVED: 'RESERVED',
+  CONSUMED: 'CONSUMED',
+  REFUNDED: 'REFUNDED'
+} as const
+
+export type CreditStatus = (typeof CreditStatus)[keyof typeof CreditStatus]
+
+
 export const AnalysisStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',

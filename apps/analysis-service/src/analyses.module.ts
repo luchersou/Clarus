@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PrismaModule } from "./infrastructure/persistence/prisma.module.js";
 import { MessagingModule } from "./infrastructure/messaging/messaging.module.js";
 import { AnalysesRpcHandler } from "./presentation/rpc/analyses.rpc-handler.js";
@@ -13,6 +14,7 @@ import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.us
 import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
 import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
 import { AnalysisRejectedListener } from "./infrastructure/messaging/listeners/analysis-rejected.listener.js";
+import { ANALYSIS_QUOTA_POLICY, type AnalysisQuotaPolicy } from "./application/analysis-quota.js";
 import { ExpireStaleAnalysesUseCase } from "./application/expire-stale-analyses.use-case.js";
 import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
 import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-timeout.scheduler.js";
@@ -22,6 +24,13 @@ import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-t
 
   providers: [
     { provide: ANALYSIS_REPOSITORY, useClass: AnalysisPrismaRepository },
+    {
+      provide: ANALYSIS_QUOTA_POLICY,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): AnalysisQuotaPolicy => ({
+        dailyLimit: Number(config.get("ANALYSIS_DAILY_LIMIT", 20)),
+      }),
+    },
 
     RequestAnalysisUseCase,
     ListAnalysesUseCase,
