@@ -6,7 +6,7 @@ Owns document processing and retrieval-augmented generation. It's the second par
 
 - Download an uploaded file, extract its text (including tables), and split it into chunks
 - Generate an embedding for each chunk and store it in `pgvector`
-- React to `document.uploaded` to run this pipeline, and to `analysis.requested` to run an analysis
+- React to `document.uploaded` to run this pipeline, and to `analysis.document_validated` to run an analysis (skipping redeliveries of one it already ran)
 - Retrieve the chunks most relevant to a question or analysis type, and pass them to an LLM
 - Stream chat answers back over Server-Sent Events, with no queue in between
 
@@ -27,7 +27,7 @@ Chat is HTTP, not RPC: a streamed answer doesn't fit the request/response shape 
 | Consumes | `document.uploaded` | `documents-service` finished saving the file, ready to be embedded |
 | Publishes | `document.embedded` | Chunking and embedding succeeded |
 | Publishes | `document.embedding_failed` | Download, extraction, or embedding failed |
-| Consumes | `analysis.requested` | `analysis-service` created an analysis request |
+| Consumes | `analysis.document_validated` | `documents-service` confirmed the document can be analyzed |
 | Publishes | `analysis.completed` | The LLM produced a result |
 | Publishes | `analysis.failed` | Retrieval or the LLM call failed |
 
@@ -65,7 +65,8 @@ apps/rag-service/
 │   │   │   ├── models.py                         # SQLAlchemy models: DocumentChunk, ChatSession, ChatMessage
 │   │   │   ├── document_chunk_repository.py      # Similarity search over embeddings
 │   │   │   ├── chat_session_repository.py        # Create/find chat sessions
-│   │   │   └── chat_message_repository.py        # Save/list messages in a session
+│   │   │   ├── chat_message_repository.py        # Save/list messages in a session
+│   │   │   └── processed_analysis_repository.py  # Claims an analysis id so a redelivery isn't run twice
 │   │   ├── text_extraction/
 │   │   │   └── extractor.py              # PDF (with tables), DOCX, and XLSX text extraction + chunking
 │   │   ├── messaging/
@@ -74,7 +75,7 @@ apps/rag-service/
 │   │   │   ├── publisher.py              # Publishes the 4 outgoing events (2 validated, 2 plain dict)
 │   │   │   └── consumers/
 │   │   │       ├── document_uploaded_consumer.py    # Handles document.uploaded
-│   │   │       └── analysis_requested_consumer.py   # Handles analysis.requested
+│   │   │       └── analysis_document_validated_consumer.py   # Handles analysis.document_validated, once per analysis
 │   │   ├── storage/
 │   │   │   └── supabase_storage_client.py    # Downloads the uploaded file from Supabase Storage
 │   │   └── llm/
@@ -84,7 +85,7 @@ apps/rag-service/
 │   ├── schemas/                          # Pydantic models generated from the shared JSON Schema contracts
 │   │   ├── document_uploaded.py
 │   │   ├── document_embedded.py
-│   │   ├── analysis_requested.py
+│   │   ├── analysis_document_validated.py
 │   │   └── analysis_completed.py
 │   │
 │   ├── api/

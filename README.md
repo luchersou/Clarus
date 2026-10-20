@@ -23,6 +23,7 @@ The backend services run on Render's free tier, which puts them to sleep after a
 
 - Document upload with asynchronous processing (text extraction, chunking, embeddings)
 - Four structured analyses per document, with status tracking (pending, completed, failed) and retry
+- Daily analysis quota per user, with the credit refunded when an analysis fails
 - Streaming chat over the user's documents (Server-Sent Events)
 - Sign-in with Google, GitHub, or email and password
 - Account management: profile, email, password, connected accounts, sessions, account deletion
@@ -65,11 +66,19 @@ sequenceDiagram
     RAG->>MQ: document.embedded / document.embedding_failed
     MQ->>DOC: mark as PROCESSED / FAILED
 
-    Note over ANA,RAG: Analysis
-    ANA->>MQ: analysis.requested
-    MQ->>RAG: analysis.requested
+    Note over ANA,RAG: Analysis (reserve credit, validate, run, consume or refund)
+    ANA->>ANA: create PENDING, reserve 1 quota credit
+    ANA->>MQ: analysis.requested (via outbox)
+    MQ->>DOC: analysis.requested
+    DOC->>MQ: analysis.document_validated / analysis.rejected
+    MQ->>RAG: analysis.document_validated
     RAG->>MQ: analysis.completed / analysis.failed
-    MQ->>ANA: store result / mark as FAILED
+    MQ->>ANA: COMPLETED + consume credit / FAILED + refund credit
+    Note over ANA: no reply within the timeout: FAILED + refund credit
+
+    Note over DOC,ANA: Document deletion
+    DOC->>MQ: document.deleted
+    MQ->>ANA: delete the document's analyses
 ```
 
 ## Services
@@ -86,6 +95,10 @@ sequenceDiagram
 ## Design decisions
 
 **Choreographed saga instead of orchestration.** The flows (upload to embedding, analysis request to result) are short and linear, so each service just publishes an event when its step finishes and the next one reacts. There is no central coordinator to build and keep in sync with every service, and no extra hop between steps, which keeps latency low. The trade-off is that the full flow isn't defined in one place; with few services and events, all named in a single shared package, that cost stays small.
+
+**The analysis saga has real compensation.** Each analysis reserves one credit of the user's daily quota. `documents-service` checks the document before anything runs; if it rejects the request, if `rag-service` fails, or if no reply arrives before the timeout, `analysis-service` fails the analysis and refunds the credit. A completed analysis consumes it.
+
+**Reliable publishing.** `analysis-service` writes `analysis.requested` to a transactional outbox together with the analysis, and a relay publishes it after the commit, so a broker outage can't leave an analysis that was never announced. Delivery is at-least-once: `rag-service` records the analyses it ran and skips redelivered ones, and `analysis-service` rejects stale writes with an optimistic status check.
 
 **Three communication styles, each where it fits.**
 - Events over RabbitMQ (topic exchange) for saga steps between services.

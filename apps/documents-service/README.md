@@ -8,6 +8,8 @@ Owns the lifecycle of uploaded documents: storing the file, tracking processing 
 - Persist document metadata and status (`UPLOADED`, `PROCESSED`, `FAILED`)
 - Publish `document.uploaded` so `rag-service` can process the file
 - React to `document.embedded` / `document.embedding_failed` to update status
+- Validate analysis requests (saga step): reply `analysis.document_validated` or `analysis.rejected`
+- Publish `document.deleted` so `analysis-service` removes the document's analyses
 - Serve document data to the gateway over RPC, scoped to the requesting user
 
 ## Endpoints
@@ -28,6 +30,10 @@ Upload is HTTP because the payload is a multipart file, not message-shaped. The 
 | Publishes | `document.uploaded` | After the file is stored and the document is persisted |
 | Consumes | `document.embedded` | `rag-service` finished processing the document |
 | Consumes | `document.embedding_failed` | `rag-service` failed to process the document |
+| Consumes | `analysis.requested` | `analysis-service` created an analysis; the document is checked |
+| Publishes | `analysis.document_validated` | The document exists, belongs to the user and is `PROCESSED` |
+| Publishes | `analysis.rejected` | Otherwise, with the reason (another user's document is reported as not found) |
+| Publishes | `document.deleted` | After a document is soft deleted |
 
 Listeners tolerate a document that no longer exists (for example, soft-deleted while still being processed) and return without error, since there's no caller waiting on an async event.
 
@@ -71,7 +77,8 @@ apps/documents-service/
 │   │   ├── list-documents.use-case.ts                  # List a user's documents
 │   │   ├── upload-document.use-case.ts                 # Store the file, persist, publish document.uploaded
 │   │   ├── mark-document-processed.use-case.ts         # Reacts to document.embedded
-│   │   └── mark-document-failed.use-case.ts            # Reacts to document.embedding_failed
+│   │   ├── mark-document-failed.use-case.ts            # Reacts to document.embedding_failed
+│   │   └── validate-analysis-request.use-case.ts       # Reacts to analysis.requested
 │   │
 │   ├── infrastructure/
 │   │   ├── persistence/
@@ -84,7 +91,8 @@ apps/documents-service/
 │   │   │   ├── document-event-publisher.ts             # Implements document-event-publisher.port.ts
 │   │   │   └── listeners/
 │   │   │       ├── document-embedded.listener.ts       # Consumes document.embedded
-│   │   │       └── document-embedding-failed.listener.ts  # Consumes document.embedding_failed
+│   │   │       ├── document-embedding-failed.listener.ts  # Consumes document.embedding_failed
+│   │   │       └── analysis-requested.listener.ts      # Consumes analysis.requested
 │   │   └── storage/
 │   │       └── supabase-storage.service.ts             # Implements file-storage.port.ts
 │   │

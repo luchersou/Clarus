@@ -8,7 +8,7 @@ Shared source of truth for everything that crosses a RabbitMQ boundary between s
 
 **`events/*.ts`** — Zod schemas and inferred TypeScript types for each event, one file per domain (`document.events.ts`, `analysis.events.ts`). A service validates a payload with the matching schema before publishing, and (for the events it consumes) before acting on it.
 
-**`schemas/*.json`** — JSON Schema equivalents of the Zod schemas above, one per event that crosses into `rag-service` (Python). These aren't consumed directly at runtime; `datamodel-codegen` reads them to generate the matching Pydantic models on the Python side. Two events (`document.embedding_failed`, `analysis.failed`) have no JSON Schema counterpart — their payload (`{ id, reason }`) is simple enough that the Python side builds the dict by hand instead.
+**`schemas/*.json`** — JSON Schema equivalents of the Zod schemas above, one per event that crosses into `rag-service` (Python). These aren't consumed directly at runtime; `datamodel-codegen` reads them to generate the matching Pydantic models on the Python side. Events that never reach Python (`analysis.requested`, `analysis.rejected`, `document.deleted`) have no JSON Schema either. Two events (`document.embedding_failed`, `analysis.failed`) have no JSON Schema counterpart — their payload (`{ id, reason }`) is simple enough that the Python side builds the dict by hand instead.
 
 **`index.ts`** — re-exports everything above, so a consuming service imports from `@clarus/event-contracts` rather than reaching into individual files.
 
