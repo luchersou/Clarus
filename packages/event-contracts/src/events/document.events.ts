@@ -25,3 +25,11 @@ export const DocumentEmbeddingFailedSchema = z.object({
   reason: z.string(),
 });
 export type DocumentEmbeddingFailedEvent = z.infer<typeof DocumentEmbeddingFailedSchema>;
+
+// Published by: documents-service, when a document is deleted
+// Consumed by: analysis-service
+export const DocumentDeletedSchema = z.object({
+  documentId: z.string().uuid(),
+  userId: z.string().uuid(),
+});
+export type DocumentDeletedEvent = z.infer<typeof DocumentDeletedSchema>;
