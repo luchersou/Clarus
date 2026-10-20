@@ -5,6 +5,7 @@ import { RequestAnalysisUseCase } from "../../application/request-analysis.use-c
 import { ListAnalysesUseCase } from "../../application/list-analyses.use-case.js";
 import { GetAnalysisUseCase } from "../../application/get-analysis.use-case.js";
 import { DeleteAnalysisUseCase } from "../../application/delete-analysis.use-case.js";
+import { GetAnalysisQuotaUseCase } from "../../application/get-analysis-quota.use-case.js";
 import { AnalysisResponseMapper } from "../analysis-response.mapper.js";
 import { RpcExceptionFilter } from "../filters/rpc-exception.filter.js";
 import {
@@ -12,6 +13,7 @@ import {
   ListAnalysesPayloadSchema,
   GetAnalysisPayloadSchema,
   DeleteAnalysisPayloadSchema,
+  GetAnalysisQuotaPayloadSchema,
 } from "../../application/dto/analyses-rpc.dto.js";
 
 @Injectable()
@@ -22,6 +24,7 @@ export class AnalysesRpcHandler {
     private readonly listAnalysesUseCase: ListAnalysesUseCase,
     private readonly getAnalysisUseCase: GetAnalysisUseCase,
     private readonly deleteAnalysisUseCase: DeleteAnalysisUseCase,
+    private readonly getAnalysisQuotaUseCase: GetAnalysisQuotaUseCase,
   ) {}
 
   @RabbitRPC({
@@ -66,5 +69,16 @@ export class AnalysesRpcHandler {
     const dto = DeleteAnalysisPayloadSchema.parse(payload);
     await this.deleteAnalysisUseCase.execute(dto);
     return { success: true };
+  }
+
+  @RabbitRPC({
+    exchange: EXCHANGES.RPC,
+    routingKey: RPC_ROUTING_KEYS.ANALYSES_QUOTA,
+    queue: RPC_QUEUES.ANALYSES_QUOTA,
+  })
+  async quota(payload: unknown) {
+    const dto = GetAnalysisQuotaPayloadSchema.parse(payload);
+    const quota = await this.getAnalysisQuotaUseCase.execute(dto);
+    return { ...quota, resetsAt: quota.resetsAt.toISOString() };
   }
 }

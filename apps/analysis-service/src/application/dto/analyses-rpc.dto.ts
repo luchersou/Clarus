@@ -24,3 +24,8 @@ export const DeleteAnalysisPayloadSchema = z.object({
   userId: z.string().uuid(),
 });
 export type DeleteAnalysisPayload = z.infer<typeof DeleteAnalysisPayloadSchema>;
+
+export const GetAnalysisQuotaPayloadSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type GetAnalysisQuotaPayload = z.infer<typeof GetAnalysisQuotaPayloadSchema>;
