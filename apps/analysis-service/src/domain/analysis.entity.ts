@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { AnalysisDomainEvent } from "./analysis-events.js";
 import type { AnalysisStatus } from "./analysis-status.js";
 import type { AnalysisType } from "./analysis-type.js";
 import { InvalidAnalysisTransitionError } from "./errors/invalid-analysis-transition.error.js";
@@ -19,6 +20,8 @@ export interface AnalysisProps {
 }
 
 export class Analysis {
+  private events: AnalysisDomainEvent[] = [];
+
   private constructor(private props: AnalysisProps) {}
 
   static create(input: {
@@ -27,7 +30,7 @@ export class Analysis {
     type: AnalysisType;
   }): Analysis {
     const now = new Date();
-    return new Analysis({
+    const analysis = new Analysis({
       id: randomUUID(),
       documentId: input.documentId,
       userId: input.userId,
@@ -41,10 +44,27 @@ export class Analysis {
       updatedAt: now,
 			deletedAt: null,
     });
+
+    analysis.events.push({
+      name: "AnalysisRequested",
+      analysisId: analysis.id,
+      documentId: analysis.documentId,
+      userId: analysis.userId,
+      type: analysis.type,
+    });
+
+    return analysis;
   }
 
   static reconstruct(props: AnalysisProps): Analysis {
     return new Analysis(props);
+  }
+
+  /** Returns the events recorded since the last call and clears them. */
+  pullEvents(): AnalysisDomainEvent[] {
+    const events = this.events;
+    this.events = [];
+    return events;
   }
 
   markAsCompleted(input: {

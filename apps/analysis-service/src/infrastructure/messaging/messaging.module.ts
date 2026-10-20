@@ -4,8 +4,6 @@ import { RabbitMQModule } from "@golevelup/nestjs-rabbitmq";
 
 import { EXCHANGES } from "@clarus/event-contracts";
 
-import { AnalysisEventPublisher } from "./analysis-event-publisher.js";
-
 @Module({
   imports: [
     ConfigModule,
@@ -25,11 +23,6 @@ import { AnalysisEventPublisher } from "./analysis-event-publisher.js";
     }),
   ],
 
-  providers: [AnalysisEventPublisher],
-
-  exports: [
-    RabbitMQModule,
-    AnalysisEventPublisher,
-  ],
+  exports: [RabbitMQModule],
 })
 export class MessagingModule {}

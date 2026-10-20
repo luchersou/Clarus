@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
+import { AnalysisRequestedSchema, ROUTING_KEYS } from "@clarus/event-contracts";
 import { PrismaService } from "./prisma.service.js";
 import { Analysis } from "../../domain/analysis.entity.js";
 import type { AnalysisRepository } from "../../domain/analysis.repository.js";
+import type { AnalysisDomainEvent } from "../../domain/analysis-events.js";
 import { Prisma } from "./generated/prisma/client.js";
 import type { Analysis as PrismaAnalysis } from "./generated/prisma/client.js"; 
 
@@ -11,12 +13,17 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
 
   async save(analysis: Analysis): Promise<void> {
     const data = this.toPersistence(analysis);
+    const outboxEvents = analysis.pullEvents().map((event) => this.toOutboxEvent(event));
 
-    await this.prisma.analysis.upsert({
-      where: { id: analysis.id },
-      create: data,
-      update: data,
-    });
+    // the analysis and its events are stored atomically; OutboxRelay publishes the events
+    await this.prisma.$transaction([
+      this.prisma.analysis.upsert({
+        where: { id: analysis.id },
+        create: data,
+        update: data,
+      }),
+      this.prisma.outboxEvent.createMany({ data: outboxEvents }),
+    ]);
   }
 
   async findById(analysisId: string): Promise<Analysis | null> {
@@ -54,6 +61,21 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
 			deletedAt: analysis.isDeleted ? analysis.deletedAt : null,
 		};
 	}
+
+  private toOutboxEvent(event: AnalysisDomainEvent): Prisma.OutboxEventCreateManyInput {
+    switch (event.name) {
+      case "AnalysisRequested":
+        return {
+          routingKey: ROUTING_KEYS.ANALYSIS_REQUESTED,
+          payload: AnalysisRequestedSchema.parse({
+            analysisId: event.analysisId,
+            documentId: event.documentId,
+            userId: event.userId,
+            type: event.type,
+          }),
+        };
+    }
+  }
 
   private toDomain(record: PrismaAnalysis): Analysis {
     return Analysis.reconstruct({
