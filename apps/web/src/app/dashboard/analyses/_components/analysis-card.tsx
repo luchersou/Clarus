@@ -43,11 +43,14 @@ function formatDate(date: string) {
 
 export function AnalysisCard({ analysis }: AnalysisCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleRetry = () => {
+    setRetryError(null);
     startTransition(async () => {
-      await requestAnalysis(analysis.documentId, analysis.type);
+      const result = await requestAnalysis(analysis.documentId, analysis.type);
+      if (!result.ok) setRetryError(result.error);
     });
   };
 
@@ -119,6 +122,9 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
                 )}
                 Try again
               </Button>
+              {retryError ? (
+                <p className="text-sm text-destructive">{retryError}</p>
+              ) : null}
             </div>
           ) : analysis.result ? (
             <AnalysisResultView content={analysis.result.content} />

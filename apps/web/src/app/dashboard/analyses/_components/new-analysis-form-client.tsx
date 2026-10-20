@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { requestAnalysis } from "@/app/dashboard/analyses/actions";
+import type { AnalysisQuota } from "@/lib/api/analyses";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ interface Document {
 
 interface NewAnalysisFormClientProps {
   documents: Document[];
+  quota: AnalysisQuota | null;
 }
 
 const ANALYSIS_TYPES = [
@@ -55,7 +57,11 @@ const ANALYSIS_TYPES = [
   },
 ] as const;
 
-export function NewAnalysisFormClient({ documents }: NewAnalysisFormClientProps) {
+function formatResetTime(resetsAt: string) {
+  return new Date(resetsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+export function NewAnalysisFormClient({ documents, quota }: NewAnalysisFormClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -65,6 +71,7 @@ export function NewAnalysisFormClient({ documents }: NewAnalysisFormClientProps)
   const [type, setType] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const quotaReached = quota !== null && quota.remaining === 0;
 
   const handleSubmit = () => {
     if (!documentId || !type) {
@@ -76,7 +83,11 @@ export function NewAnalysisFormClient({ documents }: NewAnalysisFormClientProps)
 
     startTransition(async () => {
       try {
-        await requestAnalysis(documentId, type);
+        const result = await requestAnalysis(documentId, type);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
         router.push(`/dashboard/analyses?documentId=${documentId}`);
       } catch {
         setError("Unable to start analysis. Please try again.");
@@ -197,16 +208,30 @@ export function NewAnalysisFormClient({ documents }: NewAnalysisFormClientProps)
           </Alert>
         ) : null}
 
-        <Button onClick={handleSubmit} disabled={isPending} className="w-full sm:w-auto">
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Running analysis...
-            </>
-          ) : (
-            "Run analysis"
-          )}
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            onClick={handleSubmit}
+            disabled={isPending || quotaReached}
+            className="w-full sm:w-auto"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Running analysis...
+              </>
+            ) : (
+              "Run analysis"
+            )}
+          </Button>
+
+          {quota ? (
+            <p className="text-xs text-muted-foreground">
+              {quotaReached
+                ? `Daily limit reached. Resets at ${formatResetTime(quota.resetsAt)}.`
+                : `${quota.remaining} of ${quota.limit} analyses left today`}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );

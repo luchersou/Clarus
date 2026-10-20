@@ -17,6 +17,24 @@ export async function getAnalyses(documentId?: string) {
   return res.json();
 }
 
+export interface AnalysisQuota {
+  used: number;
+  limit: number;
+  remaining: number;
+  resetsAt: string;
+}
+
+// null when the quota can't be loaded, so the page still renders
+export async function getAnalysisQuota(): Promise<AnalysisQuota | null> {
+  const res = await fetch(`${API_URL}/analyses/quota`, {
+    headers: await authHeaders(),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function getAnalysisById(id: string) {
   const res = await fetch(`${API_URL}/analyses/${id}`, {
     headers: await authHeaders(),

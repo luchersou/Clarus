@@ -104,7 +104,11 @@ export function DocumentDetailDialog({
 
     startTransition(async () => {
       try {
-        await requestAnalysis(document.id, type);
+        const result = await requestAnalysis(document.id, type);
+        if (!result.ok) {
+          setActionError({ id: document.id, message: result.error });
+          return;
+        }
         onOpenChange(false);
         router.push(`/dashboard/analyses?documentId=${document.id}`);
       } catch {
