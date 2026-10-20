@@ -14,6 +14,8 @@ import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.us
 import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
 import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
 import { AnalysisRejectedListener } from "./infrastructure/messaging/listeners/analysis-rejected.listener.js";
+import { DeleteDocumentAnalysesUseCase } from "./application/delete-document-analyses.use-case.js";
+import { DocumentDeletedListener } from "./infrastructure/messaging/listeners/document-deleted.listener.js";
 import { ANALYSIS_QUOTA_POLICY, type AnalysisQuotaPolicy } from "./application/analysis-quota.js";
 import { ExpireStaleAnalysesUseCase } from "./application/expire-stale-analyses.use-case.js";
 import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
@@ -39,12 +41,14 @@ import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-t
     MarkAnalysisCompletedUseCase,
     MarkAnalysisFailedUseCase,
     ExpireStaleAnalysesUseCase,
+    DeleteDocumentAnalysesUseCase,
 
     AnalysesRpcHandler,
 
     AnalysisCompletedListener,
     AnalysisFailedListener,
     AnalysisRejectedListener,
+    DocumentDeletedListener,
 
     OutboxRelay,
     AnalysisTimeoutScheduler,
