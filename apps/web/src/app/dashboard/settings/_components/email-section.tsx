@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2, MailCheck } from "lucide-react";
 
-import { updateEmailAction } from "@/lib/actions/account";
+import { updateEmailAction } from "@/app/dashboard/settings/actions";
 import { useSupabaseUser } from "@/hooks/use-supabase-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

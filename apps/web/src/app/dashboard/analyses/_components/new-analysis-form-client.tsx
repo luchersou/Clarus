@@ -12,7 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-import { requestAnalysis } from "@/lib/actions/analyses";
+import { requestAnalysis } from "@/app/dashboard/analyses/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

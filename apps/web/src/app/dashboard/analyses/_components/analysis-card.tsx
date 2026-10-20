@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { ChevronDown, ChevronUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
 
-import { deleteAnalysis, requestAnalysis } from "@/lib/actions/analyses";
+import { deleteAnalysis, requestAnalysis } from "@/app/dashboard/analyses/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

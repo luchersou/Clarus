@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import { deleteAccountAction } from "@/lib/actions/account";
+import { deleteAccountAction } from "@/app/dashboard/settings/actions";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,

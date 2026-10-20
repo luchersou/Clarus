@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getAnalysesAction } from "@/lib/actions/analyses";
+import { getAnalysesAction } from "@/app/dashboard/analyses/actions";
 import { AnalysisCard } from "./analysis-card";
 
 interface Analysis {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-import { updateProfileAction } from "@/lib/actions/account";
+import { updateProfileAction } from "@/app/dashboard/settings/actions";
 import { useSupabaseUser } from "@/hooks/use-supabase-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

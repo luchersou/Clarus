@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import {
   unlinkIdentityAction,
   getLinkIdentityUrl,
-} from "@/lib/actions/account";
+} from "@/app/dashboard/settings/actions";
 import { createClient } from "@/lib/supabase/client";
 import { GithubIcon } from "@/components/icons/github-icon";
 import { GoogleIcon } from "@/components/icons/google-icon";

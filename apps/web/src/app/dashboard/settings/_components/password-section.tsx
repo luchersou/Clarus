@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-import { updatePasswordAction } from "@/lib/actions/account";
+import { updatePasswordAction } from "@/app/dashboard/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
