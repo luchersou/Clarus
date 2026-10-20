@@ -6,10 +6,12 @@ import {
   DocumentUploadedSchema,
   AnalysisDocumentValidatedSchema,
   AnalysisRejectedSchema,
+  DocumentDeletedSchema,
 } from "@clarus/event-contracts";
 import type {
   AnalysisDocumentValidatedPayload,
   AnalysisRejectedPayload,
+  DocumentDeletedPayload,
   DocumentEventPublisherPort,
   DocumentUploadedPayload,
 } from "../../application/ports/document-event-publisher.port.js";
@@ -31,6 +33,10 @@ export class DocumentEventPublisher implements DocumentEventPublisherPort {
 
   async publishAnalysisRejected(payload: AnalysisRejectedPayload): Promise<void> {
     await this.publish(ROUTING_KEYS.ANALYSIS_REJECTED, AnalysisRejectedSchema.parse(payload));
+  }
+
+  async publishDocumentDeleted(payload: DocumentDeletedPayload): Promise<void> {
+    await this.publish(ROUTING_KEYS.DOCUMENT_DELETED, DocumentDeletedSchema.parse(payload));
   }
 
   private async publish(routingKey: string, event: unknown): Promise<void> {

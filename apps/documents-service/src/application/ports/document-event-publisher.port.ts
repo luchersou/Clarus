@@ -19,10 +19,16 @@ export interface AnalysisRejectedPayload {
   reason: string;
 }
 
+export interface DocumentDeletedPayload {
+  documentId: string;
+  userId: string;
+}
+
 export interface DocumentEventPublisherPort {
   publishDocumentUploaded(payload: DocumentUploadedPayload): Promise<void>;
   publishAnalysisDocumentValidated(payload: AnalysisDocumentValidatedPayload): Promise<void>;
   publishAnalysisRejected(payload: AnalysisRejectedPayload): Promise<void>;
+  publishDocumentDeleted(payload: DocumentDeletedPayload): Promise<void>;
 }
 
 export const DOCUMENT_EVENT_PUBLISHER = Symbol("DOCUMENT_EVENT_PUBLISHER");
