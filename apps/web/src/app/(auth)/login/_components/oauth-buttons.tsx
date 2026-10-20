@@ -3,7 +3,7 @@
 import { GithubIcon } from "@/components/icons/github-icon";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { GoogleIcon } from "../icons/google-icon";
+import { GoogleIcon } from "@/components/icons/google-icon";
 
 export function OAuthButtons() {
   const handleOAuthLogin = async (provider: "github" | "google") => {

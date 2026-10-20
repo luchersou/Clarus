@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { LoginForm } from "@/components/auth/login-form";
-import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { LoginForm } from "./_components/login-form";
+import { OAuthButtons } from "./_components/oauth-buttons";
 
 export default async function LoginPage() {
   const supabase = await createClient();

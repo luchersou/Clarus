@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  BarChart3Icon,
-  ChevronRight,
-  FileTextIcon,
-  HomeIcon,
-  MessageSquareIcon,
-  SettingsIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -38,54 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-type NavItem = {
-  title: string;
-  href: string;
-  icon?: LucideIcon;
-  isComing?: boolean;
-  isDataBadge?: string;
-  isNew?: boolean;
-  newTab?: boolean;
-  items?: NavItem[];
-};
-
-type NavGroup = {
-  title: string;
-  items: NavItem[];
-};
-
-export const navItems: NavGroup[] = [
-  {
-    title: "Navigation",
-    items: [
-      {
-        title: "Home",
-        href: "/dashboard",
-        icon: HomeIcon,
-      },
-      {
-        title: "Documents",
-        href: "/dashboard/documents",
-        icon: FileTextIcon,
-      },
-      {
-        title: "Analyses",
-        href: "/dashboard/analyses",
-        icon: BarChart3Icon,
-      },
-      {
-        title: "Chat",
-        href: "/dashboard/chat",
-        icon: MessageSquareIcon,
-      },
-      {
-        title: "Settings",
-        href: "/dashboard/settings",
-        icon: SettingsIcon,
-      },
-    ],
-  },
-];
+import { navItems } from "@/app/dashboard/_lib/nav-items";
 
 export function NavMain() {
   const pathname = usePathname();

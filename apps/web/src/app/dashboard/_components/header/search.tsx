@@ -4,7 +4,7 @@ import { CommandIcon, SearchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-import { navItems } from "@/app/dashboard/_components/sidebar/nav-main";
+import { navItems } from "@/app/dashboard/_lib/nav-items";
 import { Button } from "@/components/ui/button";
 import {
   Command,

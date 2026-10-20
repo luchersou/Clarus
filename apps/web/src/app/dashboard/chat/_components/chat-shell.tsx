@@ -1,6 +1,6 @@
 "use client";
 
-import { useChatStream } from "@/hooks/use-chat-stream";
+import { useChatStream } from "../_hooks/use-chat-stream";
 import { MessageList } from "./message-list";
 import { MessageInput } from "./message-input";
 

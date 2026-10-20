@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, FileCheck } from "lucide-react";
-import { Reveal } from "@/components/reveal";
+import { Reveal } from "../reveal";
 
 export function CTA() {
   return (

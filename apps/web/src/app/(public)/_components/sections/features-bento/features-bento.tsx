@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Reveal } from "@/components/reveal";
+import { Reveal } from "../../reveal";
 import { ActionsPanel } from "./actions-panel";
 import { FormatsPanel } from "./formats-panel";
 import { AccuracyPanel } from "./accuracy-panel";

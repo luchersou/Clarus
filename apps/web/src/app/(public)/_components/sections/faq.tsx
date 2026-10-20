@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { Reveal } from "@/components/reveal";
+import { Reveal } from "../reveal";
 import { cn } from "@/lib/utils";
 
 const FAQS = [
