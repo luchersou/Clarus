@@ -14,6 +14,7 @@ import { MarkAnalysisCompletedUseCase } from "./application/mark-analysis-comple
 import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.use-case.js";
 import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
 import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
+import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
 
 @Module({
   imports: [PrismaModule, MessagingModule],
@@ -33,6 +34,8 @@ import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/ana
 
     AnalysisCompletedListener,
     AnalysisFailedListener,
+
+    OutboxRelay,
   ],
 })
 export class AnalysesModule {}
