@@ -4,6 +4,7 @@ export interface AnalysisRepository {
   save(analysis: Analysis): Promise<void>;
   findById(analysisId: string): Promise<Analysis | null>;
   findByUserId(userId: string, documentId?: string): Promise<Analysis[]>;
+  findPendingCreatedBefore(cutoff: Date, limit: number): Promise<Analysis[]>;
 }
 
 export const ANALYSIS_REPOSITORY = Symbol("ANALYSIS_REPOSITORY");

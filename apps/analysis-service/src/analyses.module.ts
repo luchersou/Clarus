@@ -12,7 +12,9 @@ import { MarkAnalysisCompletedUseCase } from "./application/mark-analysis-comple
 import { MarkAnalysisFailedUseCase } from "./application/mark-analysis-failed.use-case.js";
 import { AnalysisCompletedListener } from "./infrastructure/messaging/listeners/analysis-completed.listener.js";
 import { AnalysisFailedListener } from "./infrastructure/messaging/listeners/analysis-failed.listener.js";
+import { ExpireStaleAnalysesUseCase } from "./application/expire-stale-analyses.use-case.js";
 import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
+import { AnalysisTimeoutScheduler } from "./infrastructure/scheduling/analysis-timeout.scheduler.js";
 
 @Module({
   imports: [PrismaModule, MessagingModule],
@@ -26,6 +28,7 @@ import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
     DeleteAnalysisUseCase,
     MarkAnalysisCompletedUseCase,
     MarkAnalysisFailedUseCase,
+    ExpireStaleAnalysesUseCase,
 
     AnalysesRpcHandler,
 
@@ -33,6 +36,7 @@ import { OutboxRelay } from "./infrastructure/messaging/outbox-relay.js";
     AnalysisFailedListener,
 
     OutboxRelay,
+    AnalysisTimeoutScheduler,
   ],
 })
 export class AnalysesModule {}

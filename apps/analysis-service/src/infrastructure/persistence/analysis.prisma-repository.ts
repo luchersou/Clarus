@@ -56,6 +56,15 @@ export class AnalysisPrismaRepository implements AnalysisRepository {
     return records.map((record) => this.toDomain(record));
   }
 
+  async findPendingCreatedBefore(cutoff: Date, limit: number): Promise<Analysis[]> {
+    const records = await this.prisma.analysis.findMany({
+      where: { status: "PENDING", deletedAt: null, createdAt: { lt: cutoff } },
+      orderBy: { createdAt: "asc" },
+      take: limit,
+    });
+    return records.map((record) => this.toDomain(record));
+  }
+
   private toPersistence(analysis: Analysis): Prisma.AnalysisUncheckedCreateInput {
 		return {
 			id: analysis.id,
