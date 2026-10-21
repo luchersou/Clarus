@@ -5,7 +5,7 @@ Owns analysis requests, their results and the daily analysis quota. It starts th
 ## Responsibilities
 
 - Create an analysis request for one of the four types (Summary, Extract values, Deadlines, Compare), unless the user hit the daily quota or the same analysis is already running
-- Publish `analysis.requested` so `rag-service` can run it, through a transactional outbox
+- Publish `analysis.requested` through a transactional outbox, so `documents-service` can validate the document before `rag-service` runs it
 - React to `analysis.completed` / `analysis.failed` / `analysis.rejected` to store the result and settle the credit
 - React to `document.deleted` by deleting the document's analyses
 - Fail analyses that never got a reply (saga timeout)
@@ -16,12 +16,13 @@ Owns analysis requests, their results and the daily analysis quota. It starts th
 | Type | Routing key | Use case |
 |---|---|---|
 | RPC | `analyses.request` | `RequestAnalysisUseCase` |
-| RPC | `analyses.list-by-document` | `ListAnalysesUseCase` |
+| RPC | `analyses.list` | `ListAnalysesUseCase` |
 | RPC | `analyses.get-by-id` | `GetAnalysisUseCase` |
 | RPC | `analyses.delete` | `DeleteAnalysisUseCase` |
 | RPC | `analyses.quota` | `GetAnalysisQuotaUseCase` |
+| HTTP | `GET /health` | Health check, used by Render |
 
-All of them are RPC over RabbitMQ, called by the `api-gateway`. There's no HTTP route: unlike `documents-service`, no request here carries a file.
+Everything except the health check is RPC over RabbitMQ, called by the `api-gateway`: unlike `documents-service`, no request here carries a file.
 
 ## Events
 
@@ -58,7 +59,7 @@ Clean Architecture, with dependencies pointing inward:
 - **`infrastructure`** — the adapters: Prisma repository (which also writes the outbox), outbox relay, RabbitMQ listeners and the timeout scheduler.
 - **`presentation`** — the RPC handler, plus response mapping and exception filters.
 
-`GetAnalysisUseCase`, `ListAnalysesUseCase`, and `DeleteAnalysisUseCase` check that the analysis (or the document it belongs to) belongs to the requesting user and return "not found" rather than "forbidden" on a mismatch, so the existence of another user's data isn't revealed.
+`GetAnalysisUseCase` and `DeleteAnalysisUseCase` check that the analysis belongs to the requesting user and return "not found" rather than "forbidden" on a mismatch, so the existence of another user's data isn't revealed. `ListAnalysesUseCase` only ever queries the requesting user's analyses.
 
 ## Project structure
 
@@ -91,10 +92,10 @@ apps/analysis-service/
 │   │   ├── get-analysis-quota.use-case.ts              # Used / remaining credits today
 │   │   ├── expire-stale-analyses.use-case.ts           # Saga timeout: fails stale PENDING analyses
 │   │   ├── request-analysis.use-case.ts                # Persist analysis + analysis.requested (outbox)
-│   │   ├── list-analyses.use-case.ts                   # List analyses for a document
+│   │   ├── list-analyses.use-case.ts                   # List the user's analyses, optionally for one document
 │   │   ├── get-analysis.use-case.ts                    # Fetch one analysis, checks ownership
 │   │   ├── mark-analysis-completed.use-case.ts         # Reacts to analysis.completed
-│   │   └── mark-analysis-failed.use-case.ts            # Reacts to analysis.failed
+│   │   └── mark-analysis-failed.use-case.ts            # Reacts to analysis.failed and analysis.rejected
 │   │
 │   ├── infrastructure/
 │   │   ├── persistence/
@@ -115,7 +116,7 @@ apps/analysis-service/
 │   │
 │   ├── presentation/
 │   │   ├── rpc/
-│   │   │   └── analyses.rpc-handler.ts                 # RPC handlers: request, list, get-by-id, delete
+│   │   │   └── analyses.rpc-handler.ts                 # RPC handlers: request, list, get-by-id, delete, quota
 │   │   ├── filters/
 │   │   │   └── rpc-exception.filter.ts
 │   │   ├── health/
@@ -160,7 +161,7 @@ ANALYSIS_TIMEOUT_CHECK_INTERVAL_MS=60000
 | `ANALYSIS_TIMEOUT_MS` | How long an analysis may stay `PENDING` before it's failed (default 10 min) |
 | `ANALYSIS_TIMEOUT_CHECK_INTERVAL_MS` | How often stale analyses are checked (default 1 min) |
 
-> **Note:** `DIRECT_URL` is only required when using a hosted PostgreSQL provider such as Supabase. For a local PostgreSQL instance, `DATABASE_URL` can be used directly for Prisma migrations.
+> **Note:** Prisma migrations always read `DIRECT_URL` (`prisma.config.ts`), so it must be set. With a hosted provider such as Supabase it's the direct (non-pooled) connection; with a local PostgreSQL instance, use the same value as `DATABASE_URL`.
 
 ## Running
 
@@ -172,3 +173,13 @@ pnpm dev:analysis
 ```
 
 The service listens on `http://localhost:3003`. This script runs `start`, not `start:dev`, so it doesn't reload on file changes.
+
+## Tests
+
+Integration tests run against a real PostgreSQL (pgvector image, with the root `init-schemas.sql`) and RabbitMQ, started with Testcontainers, so Docker must be running. The global setup applies the migrations through `prisma.test.config.ts`, which only reads the URL of the test container.
+
+```bash
+pnpm test:integration
+```
+
+Test files run one at a time. `test/support/create-app.ts` boots the real `AppModule` with the outbox relay and the timeout scheduler slowed down, so tests drive them by hand. There are no unit tests yet, so use `test:integration` rather than plain `pnpm test`, which doesn't start the containers.
