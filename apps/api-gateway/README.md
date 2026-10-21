@@ -4,7 +4,7 @@ Single entry point for the Clarus frontend. It authenticates every request and f
 
 ## Responsibilities
 
-- Validate the Supabase access token on every protected route
+- Validate the Supabase access token on every route (a global guard; only `/health` is public)
 - Route each request to the service that owns the data, using the transport that fits the operation
 - Translate errors from downstream services into HTTP responses
 
@@ -12,17 +12,37 @@ Single entry point for the Clarus frontend. It authenticates every request and f
 
 | Endpoint | Transport | Target |
 |---|---|---|
-| `POST /documents/upload` | HTTP (multipart) | documents-service |
-| `GET /documents` | RPC | documents-service |
-| `GET /documents/:id` | RPC | documents-service |
-| `DELETE /documents/:id` | RPC | documents-service |
-| `POST /analyses` | RPC | analysis-service |
-| `GET /analyses?documentId=` | RPC | analysis-service |
-| `GET /analyses/:id` | RPC | analysis-service |
+| `POST /documents` (multipart, field `file`) | HTTP | documents-service |
+| `GET /documents` | RPC `documents.list` | documents-service |
+| `GET /documents/:id` | RPC `documents.get-by-id` | documents-service |
+| `DELETE /documents/:id` | RPC `documents.delete` | documents-service |
+| `POST /analyses` | RPC `analyses.request` | analysis-service |
+| `GET /analyses?documentId=` | RPC `analyses.list` | analysis-service |
+| `GET /analyses/quota` | RPC `analyses.quota` | analysis-service |
+| `GET /analyses/:id` | RPC `analyses.get-by-id` | analysis-service |
+| `DELETE /analyses/:id` | RPC `analyses.delete` | analysis-service |
 | `POST /chat` (SSE stream) | HTTP | rag-service |
 | `GET /chat/sessions` | HTTP | rag-service |
 | `GET /chat/sessions/:id/messages` | HTTP | rag-service |
-| `GET /dashboard/summary` | RPC | documents-service, analysis-service |
+| `GET /dashboard/summary` | RPC `documents.list` + `analyses.list`, in parallel | documents-service, analysis-service |
+| `GET /health` (public) | — | — |
+
+RPC calls go to the `clarus.rpc` exchange with a 5 s timeout. Uploads accept PDF, DOCX, and XLSX only (anything else is a 400) and are forwarded with a 30 s timeout. `GET /analyses/quota` is declared before `GET /analyses/:id` so that `quota` isn't captured as an id.
+
+## Error mapping
+
+Services answer RPC errors as `{ error, message }`; `shared/rpc-error.mapper.ts` turns them into HTTP responses:
+
+| RPC error | HTTP |
+|---|---|
+| `VALIDATION_ERROR` | 400, with `details` |
+| `NOT_FOUND` | 404 |
+| `CONFLICT` (the same analysis is already running) | 409 |
+| `QUOTA_EXCEEDED` (daily analysis limit reached) | 429 |
+| anything else | 500 |
+| no reply / broker unreachable | 503 |
+
+Invalid request bodies (Zod) are answered with 400 by `filters/zod-exception.filter.ts`.
 
 ## Design notes
 
@@ -36,7 +56,7 @@ Single entry point for the Clarus frontend. It authenticates every request and f
 apps/api-gateway/
 ├── src/
 │   ├── auth/
-│   │   ├── supabase-auth.guard.ts        # Validates the Supabase token on protected routes
+│   │   ├── supabase-auth.guard.ts        # Global guard: validates the Supabase token
 │   │   ├── current-user.decorator.ts     # Exposes the authenticated user to controllers
 │   │   ├── public.decorator.ts           # Marks a route as exempt from the auth guard
 │   │   └── auth.module.ts
@@ -52,7 +72,9 @@ apps/api-gateway/
 │   │   └── documents.module.ts
 │   │
 │   ├── analyses/
-│   │   ├── analyses.controller.ts        # Request, list, and get analysis routes
+│   │   ├── dto/
+│   │   │   └── request-analysis.dto.ts   # Zod schema for the analysis request body
+│   │   ├── analyses.controller.ts        # Request, list, quota, get, and delete routes
 │   │   ├── analyses.service.ts           # RPC calls to analysis-service
 │   │   └── analyses.module.ts
 │   │
@@ -71,7 +93,7 @@ apps/api-gateway/
 │   ├── health/
 │   │   └── health.controller.ts          # GET /health, public — used by Render's health check
 │   │
-│   ├── filter/
+│   ├── filters/
 │   │   └── zod-exception.filter.ts       # Maps Zod validation errors to HTTP 400
 │   │
 │   ├── messaging/
@@ -94,6 +116,8 @@ SUPABASE_ANON_KEY=<your-supabase-publishable-key>
 RABBITMQ_URL=amqp://guest:guest@localhost:5672
 DOCUMENTS_SERVICE_URL=http://localhost:3002
 RAG_SERVICE_URL=http://localhost:3004
+FRONTEND_URLS=http://localhost:3000
+PORT=3001
 ```
 
 | Variable | Description |
@@ -103,14 +127,16 @@ RAG_SERVICE_URL=http://localhost:3004
 | `RABBITMQ_URL` | RabbitMQ connection string, used for RPC |
 | `DOCUMENTS_SERVICE_URL` | Base URL of `documents-service`, used for uploads |
 | `RAG_SERVICE_URL` | Base URL of `rag-service`, used for chat |
+| `FRONTEND_URLS` | Comma-separated origins allowed by CORS |
+| `PORT` | Service port (default 3001) |
 
 ## Running
 
-RabbitMQ and Postgres must be running (`docker compose up -d` from the repository root), and migrations must have been applied (`pnpm run setup` from the repository root, or `pnpm db:migrate:documents` for just this service).
+RabbitMQ must be running (`docker compose up -d` from the repository root), along with `documents-service`, `analysis-service`, and `rag-service` for the routes that reach them. The gateway has no database, so there are no migrations.
 
 ```bash
 # From the repository root
-pnpm dev:documents
+pnpm dev:api
 ```
 
-The service listens on `http://localhost:3002`. 
+The service listens on `http://localhost:3001`. This script runs `start`, not `start:dev`, so it doesn't reload on file changes.
