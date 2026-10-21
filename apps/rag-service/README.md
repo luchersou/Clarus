@@ -1,6 +1,6 @@
 # rag-service
 
-Owns document processing and retrieval-augmented generation. It's the second participant in the document processing saga, and the second step of the analysis flow. It also serves the chat feature directly over HTTP.
+Owns document processing and retrieval-augmented generation. It's the second participant in the document processing saga, and the step of the analysis saga that runs the analysis, after `documents-service` has validated the document. It also serves the chat feature directly over HTTP.
 
 ## Responsibilities
 
@@ -17,6 +17,9 @@ Owns document processing and retrieval-augmented generation. It's the second par
 | POST | `/chat` | Ask a question about one document or across all of them; response streams as SSE |
 | GET | `/chat/sessions` | List a user's chat sessions |
 | GET | `/chat/sessions/{id}/messages` | List the messages in a session |
+| GET | `/health` | Health check, used by Render |
+
+These routes don't authenticate: they trust the `user_id` sent by the `api-gateway` (in the `/chat` body, as a query parameter on the GET routes), which takes it from the validated token. The service is meant to be reachable only by the gateway. A chat stream emits a `session` event (the session id), then `message` events with the answer, then `done`.
 
 Chat is HTTP, not RPC: a streamed answer doesn't fit the request/response shape RabbitMQ RPC is built for, and the `api-gateway` proxies these routes directly instead of going through the broker.
 
@@ -31,7 +34,13 @@ Chat is HTTP, not RPC: a streamed answer doesn't fit the request/response shape 
 | Publishes | `analysis.completed` | The LLM produced a result |
 | Publishes | `analysis.failed` | Retrieval or the LLM call failed |
 
-Both consumers catch their own exceptions and always publish a `*_failed` event on error, so a message is never left unacknowledged and endlessly redelivered by RabbitMQ.
+Events go through the `clarus.events` exchange; this service consumes from the `rag.document-uploaded` and `rag.analysis-document-validated` queues.
+
+The use cases catch their own exceptions and publish a `*_failed` event on error. Anything that fails before that (an unparsable payload, or the database being down) makes the consumer reject the message without requeueing it, so it's never redelivered in a loop.
+
+**Running an analysis at most once.** Events are delivered at least once, so the same `analysis.document_validated` can arrive twice. Before running an analysis, the consumer claims its id in the `processed_analyses` table (`INSERT ... ON CONFLICT DO NOTHING`); if the id was already there, the message is acknowledged and skipped, and the LLM isn't called again. The claim is committed before the analysis runs, so if the worker dies halfway, the redelivery is skipped too, and the analysis is failed (and its credit refunded) by `analysis-service`'s timeout.
+
+`rag-service` doesn't consume `document.deleted`: a deleted document's chunks and chat sessions stay in the `rag` schema.
 
 ## Architecture
 
@@ -62,7 +71,7 @@ apps/rag-service/
 │   ├── infrastructure/
 │   │   ├── persistence/
 │   │   │   ├── database.py                       # Async engine and session factory
-│   │   │   ├── models.py                         # SQLAlchemy models: DocumentChunk, ChatSession, ChatMessage
+│   │   │   ├── models.py                         # SQLAlchemy models: DocumentChunk, ChatSession, ChatMessage, ProcessedAnalysis
 │   │   │   ├── document_chunk_repository.py      # Similarity search over embeddings
 │   │   │   ├── chat_session_repository.py        # Create/find chat sessions
 │   │   │   ├── chat_message_repository.py        # Save/list messages in a session
@@ -90,11 +99,11 @@ apps/rag-service/
 │   │
 │   ├── api/
 │   │   ├── health_router.py              # GET /health — used by Render's health check
-│   │   └── chat_router.py                # POST /chat (SSE) and the two session-listing routes
+│   │   └── chat_router.py                # POST /chat (SSE), list sessions, list a session's messages
 │   │
 │   └── main.py                           # FastAPI app; starts consumers on startup, closes RabbitMQ on shutdown
 │
-├── alembic/                              # Migrations for the `rag` schema (document_chunks, chat_sessions, chat_messages)
+├── alembic/                              # Migrations for the `rag` schema (document_chunks, chat_sessions, chat_messages, processed_analyses)
 │   ├── versions/
 │   └── env.py                            # Configured for async SQLAlchemy, restricted to the `rag` schema
 ├── .env
@@ -128,7 +137,7 @@ GROQ_API_KEY="..."
 
 RabbitMQ and Postgres must be running (`docker compose up -d` from the repository root), and the `vector` extension must exist on the database (already handled by the root init script).
 
-Unlike `documents-service` and `analysis-service`, this service's migrations aren't part of the root `pnpm setup`/`db:setup` scripts — apply them directly with Alembic:
+The root `pnpm run setup` applies this service's migrations, but `pnpm db:setup` (and `db:migrate:*`) only covers the Prisma services. To apply them on their own, use Alembic:
 
 ```bash
 cd apps/rag-service
