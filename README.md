@@ -49,6 +49,7 @@ flowchart LR
     DOC -.->|files| ST["Supabase Storage"]
     RAG -.->|files| ST
     RAG -.->|completions| LLM["Groq"]
+    RAG -.->|embeddings| EMB["Google Gemini"]
 ```
 
 ### Event flows
@@ -87,8 +88,8 @@ sequenceDiagram
 |---|---|---|
 | [`web`](apps/web/README.md) | Next.js (App Router), TypeScript, Tailwind CSS v4, shadcn/ui | Landing page, authentication, dashboard |
 | [`api-gateway`](apps/api-gateway/README.md) | NestJS | Single entry point: validates the Supabase JWT and routes requests to the services. No database |
-| [`documents-service`](apps/documents-service/README.md) | NestJS, Prisma | Document lifecycle: upload, listing, status, soft delete |
-| [`analysis-service`](apps/analysis-service/README.md) | NestJS, Prisma | Analysis requests and results |
+| [`documents-service`](apps/documents-service/README.md) | NestJS, Prisma | Document lifecycle: upload, listing, status, soft delete. Validates analysis requests (saga step) |
+| [`analysis-service`](apps/analysis-service/README.md) | NestJS, Prisma | Analysis requests and results, daily quota, outbox and saga timeout |
 | [`rag-service`](apps/rag-service/README.md) | Python, FastAPI, Pydantic, SQLAlchemy, Alembic, PgVector | Text extraction, embeddings, retrieval, LLM calls, chat |
 | [`event-contracts`](packages/event-contracts/README.md) | TypeScript, Zod | Shared messaging topology and event schemas |
 
@@ -105,9 +106,9 @@ sequenceDiagram
 - RPC over RabbitMQ, using the same library, for reads and commands from the gateway to the NestJS services.
 - Plain HTTP where the payload is not message-shaped: multipart upload from the gateway to `documents-service`, and streamed chat responses (SSE) from `rag-service`.
 
-**Clean Architecture in the NestJS domain services.** Each service is split into `domain`, `application`, `infrastructure`, and `presentation`, with dependencies pointing inward. Entities hold the business rules, and use cases depend on ports (repository, file storage, event publisher) that Prisma, RabbitMQ, and Supabase Storage implement, so business logic never depends on them and each one can be swapped without touching it.
+**Clean Architecture in the NestJS domain services.** Each service is split into `domain`, `application`, `infrastructure`, and `presentation`, with dependencies pointing inward. Entities hold the business rules, and use cases depend on ports (repositories, plus file storage and an event publisher in `documents-service`) that Prisma, RabbitMQ, and Supabase Storage implement, so business logic never depends on them and each one can be swapped without touching it. In `analysis-service`, events are recorded by the entity and saved to the outbox by the repository, so its use cases need no publisher port.
 
-**Shared contracts across two languages.** `@clarus/event-contracts` holds the exchange, queue, and routing key names and the Zod schemas for events. For the events that cross into Python, the same shapes are also published as JSON Schema, and the Pydantic models in `rag-service` are generated from them, so there is a single source of truth instead of hand-maintained copies.
+**Shared contracts across two languages.** `@clarus/event-contracts` holds the exchange, queue, and routing key names and the Zod schemas for events, used by every TypeScript service. For the structured events that cross into Python, the same shapes are also published as JSON Schema, and the Pydantic models in `rag-service` are generated from them instead of being written by hand. The Python side still declares its own exchange, queue, and routing key names, and builds the two simple `*_failed` payloads as plain dicts, so those must be kept in sync manually.
 
 **Per-user isolation.** Each user is their own tenant. The gateway derives the user ID from the validated Supabase JWT and never trusts one sent by the client. Use cases verify ownership and return "not found" instead of "forbidden" on a mismatch, so the existence of other users' resources isn't revealed.
 
@@ -137,7 +138,7 @@ sequenceDiagram
 - Node.js (LTS) and [pnpm](https://pnpm.io/)
 - Python and [uv](https://docs.astral.sh/uv/)
 - Docker
-- A Supabase project with Google and GitHub providers enabled, plus a Storage bucket for uploaded files
+- A Supabase project with Google and GitHub providers enabled, plus a Storage bucket named `documents` for uploaded files
 - API keys for the LLM and embedding providers used by `rag-service`
 
 ### Run locally
@@ -148,13 +149,25 @@ docker compose up -d
 
 # 2. Create a .env file in each service (each service's README lists its variables)
 
-# 3. Install dependencies, build the shared contracts, run the Prisma migrations, and apply the rag-service migrations
+# 3. Install dependencies, run the Prisma migrations, and apply the rag-service migrations
 pnpm run setup
 
-# 4. Start every service in a single terminal
+# 4. Build the shared contracts (the NestJS services import the compiled output)
+pnpm build:contracts
+
+# 5. Start every service in a single terminal
 pnpm dev
 ```
 
-`pnpm dev` runs the web app, the API gateway, and the three domain services together. The web app is served at `http://localhost:3000`, and RabbitMQ's management UI at `http://localhost:15672` (`guest` / `guest`).
+`pnpm dev` runs the web app, the API gateway, and the three domain services together. The web app is served at `http://localhost:3000`, the gateway at `http://localhost:3001`, and RabbitMQ's management UI at `http://localhost:15672` (`guest` / `guest`). Run `pnpm build:contracts` again whenever `packages/event-contracts` changes.
 
 Use `pnpm run setup`, not `pnpm setup`, which is a built-in pnpm command.
+
+## Tests
+
+`documents-service` and `analysis-service` have integration tests that run against a real PostgreSQL and RabbitMQ started with Testcontainers (Docker must be running):
+
+```bash
+pnpm --filter documents-service test:integration
+pnpm --filter analysis-service test:integration
+```

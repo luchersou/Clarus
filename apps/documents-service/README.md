@@ -20,6 +20,7 @@ Owns the lifecycle of uploaded documents: storing the file, tracking processing 
 | RPC | `documents.list` | `ListDocumentsUseCase` |
 | RPC | `documents.get-by-id` | `GetDocumentUseCase` |
 | RPC | `documents.delete` | `DeleteDocumentUseCase` |
+| HTTP | `GET /health` | Health check, used by Render |
 
 Upload is HTTP because the payload is a multipart file, not message-shaped. The other three are RPC over RabbitMQ, called by the `api-gateway`.
 
@@ -133,10 +134,10 @@ PORT=3002
 | `DIRECT_URL` | Direct Postgres connection string used by Prisma for migrations |
 | `RABBITMQ_URL` | RabbitMQ connection string |
 | `SUPABASE_URL` | Supabase project URL, used for Storage |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key, used to upload files server-side |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key, used server-side to upload files and create signed URLs (the bucket must be named `documents`) |
 | `PORT` | HTTP port for the upload route |
 
-> **Note:** `DIRECT_URL` is only required when using a hosted PostgreSQL provider such as Supabase. For a local PostgreSQL instance, `DATABASE_URL` can be used directly for Prisma migrations.
+> **Note:** Prisma migrations always read `DIRECT_URL` (`prisma.config.ts`), so it must be set. With a hosted provider such as Supabase it's the direct (non-pooled) connection; with a local PostgreSQL instance, use the same value as `DATABASE_URL`.
 
 ## Running
 
@@ -150,3 +151,13 @@ pnpm exec prisma migrate deploy
 # Start the service
 pnpm start:dev
 ```
+
+## Tests
+
+Integration tests run against a real PostgreSQL (pgvector image, with the root `init-schemas.sql`) and RabbitMQ, started with Testcontainers, so Docker must be running. The global setup applies the migrations through `prisma.test.config.ts`, which only reads the URL of the test container.
+
+```bash
+pnpm test:integration
+```
+
+Test files run one at a time. There are no unit tests yet, so use `test:integration` rather than plain `pnpm test`, which doesn't start the containers.
