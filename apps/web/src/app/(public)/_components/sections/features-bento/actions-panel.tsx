@@ -1,288 +1,134 @@
-const LABELS = ["Summary", "Extract values", "Deadlines", "Compare"];
+"use client";
 
-function SummaryResult() {
+import { useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useCardActive } from "./feature-card";
+import { useCycle } from "./hooks";
+
+const ROW_HEIGHT = 40;
+const CYCLE_INTERVAL = 1700;
+const DEFAULT_ACTION = 1;
+
+function ResultRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1.5">
-      <div className="h-1.5 w-full rounded-full bg-muted" />
-      <div className="h-1.5 w-4/5 rounded-full bg-muted" />
-      <div className="h-1.5 w-2/5 rounded-full bg-primary/60" />
+    <div className="flex items-center justify-between gap-4 text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="whitespace-nowrap font-mono">{value}</span>
     </div>
   );
 }
 
-function ExtractResult() {
-  return (
-    <div className="space-y-1.5 text-xs">
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Total</span>
-        <span className="font-mono">$4,820.00</span>
+const ACTIONS: { label: string; source: string; result: ReactNode }[] = [
+  {
+    label: "Summary",
+    source: "Pages 1–12",
+    result: (
+      <p className="text-xs leading-relaxed text-foreground/90">
+        12-month supply agreement worth $48,750, payable in full by Oct 15,
+        2026.
+      </p>
+    ),
+  },
+  {
+    label: "Extract values",
+    source: "Page 4, clause 3",
+    result: (
+      <div className="space-y-2.5">
+        <ResultRow label="Total amount" value="$48,750.00" />
+        <ResultRow label="Due date" value="Oct 15, 2026" />
+        <ResultRow label="Late fee" value="2% per month" />
       </div>
-
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Tax</span>
-        <span className="font-mono">$386.00</span>
+    ),
+  },
+  {
+    label: "Deadlines",
+    source: "Pages 4–5",
+    result: (
+      <div className="space-y-2.5">
+        <ResultRow label="Payment due" value="Oct 15, 2026" />
+        <ResultRow label="Inspection" value="10 business days" />
       </div>
-    </div>
-  );
-}
-
-function DeadlinesResult() {
-  return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="size-1.5 rounded-full bg-primary" />
-      <span className="text-muted-foreground">Due</span>
-      <span className="font-mono">Oct 15</span>
-    </div>
-  );
-}
-
-function CompareResult() {
-  return (
-    <div className="flex items-end gap-1.5">
-      <div className="h-6 w-2.5 rounded-sm bg-muted" />
-      <div className="h-9 w-2.5 rounded-sm bg-primary/70" />
-      <div className="h-4 w-2.5 rounded-sm bg-muted" />
-    </div>
-  );
-}
-
-function DocLines({ highlight }: { highlight: number }) {
-  return (
-    <div className="space-y-2">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className={[
-            "h-1.5 rounded-full transition-all duration-300",
-            i === 4 ? "w-2/3" : "w-full",
-            i === highlight
-              ? "bg-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.35)]"
-              : "bg-muted",
-          ].join(" ")}
-        />
-      ))}
-    </div>
-  );
-}
-
-const RESULTS = [
-  {
-    highlight: 2,
-    result: <SummaryResult />,
-    source: "p.1 · 99%",
+    ),
   },
   {
-    highlight: 0,
-    result: <ExtractResult />,
-    source: "p.3 · 98%",
-  },
-  {
-    highlight: 4,
-    result: <DeadlinesResult />,
-    source: "p.2 · 97%",
-  },
-  {
-    highlight: 1,
-    result: <CompareResult />,
-    source: "p.4 · 96%",
+    label: "Compare",
+    source: "2025 vs 2026 contract",
+    result: (
+      <div className="space-y-2.5">
+        <ResultRow label="Total" value="$45,000 → $48,750" />
+        <ResultRow label="Late fee" value="1.5% → 2%" />
+      </div>
+    ),
   },
 ];
 
 export function ActionsPanel() {
+  const active = useCardActive();
+  const cycled = useCycle(
+    active,
+    ACTIONS.length,
+    CYCLE_INTERVAL,
+    DEFAULT_ACTION,
+  );
+
+  // Pointing at an action shows it right away and pauses the cycle
+  const [pointed, setPointed] = useState<number | null>(null);
+  const current = pointed ?? cycled;
+  const { result, source } = ACTIONS[current];
+
   return (
-    <>
-      <style>{`
-        @keyframes action-selector {
-          0%, 20% {
-            transform: translateY(0);
-          }
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <div
+        onPointerLeave={() => setPointed(null)}
+        className="relative shrink-0 rounded-xl bg-background p-1.5 ring-1 ring-border sm:w-44"
+      >
+        <motion.div
+          initial={false}
+          animate={{ y: current * ROW_HEIGHT }}
+          transition={{ type: "spring", stiffness: 520, damping: 38 }}
+          style={{ height: ROW_HEIGHT }}
+          className="absolute inset-x-1.5 top-1.5 rounded-lg bg-primary/15"
+        />
 
-          25%, 45% {
-            transform: translateY(40px);
-          }
-
-          50%, 70% {
-            transform: translateY(80px);
-          }
-
-          75%, 95% {
-            transform: translateY(120px);
-          }
-
-          100% {
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes label-pulse {
-          0%, 20% {
-            opacity: 0.65;
-            transform: translateX(0);
-          }
-
-          25%, 45% {
-            opacity: 1;
-            transform: translateX(3px);
-          }
-
-          50%, 100% {
-            opacity: 0.65;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes document-result {
-          0%, 15% {
-            opacity: 0;
-            transform: translateY(5px) scale(0.98);
-          }
-
-          20%, 42% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-
-          48%, 100% {
-            opacity: 0;
-            transform: translateY(-3px) scale(0.98);
-          }
-        }
-
-        @keyframes result-show {
-          0%, 15% {
-            opacity: 0;
-            transform: translateY(6px);
-          }
-
-          20%, 42% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-
-          48%, 100% {
-            opacity: 0;
-            transform: translateY(-4px);
-          }
-        }
-
-        @keyframes document-scan {
-          0% {
-            transform: translateY(0);
-          }
-
-          100% {
-            transform: translateY(100px);
-          }
-        }
-      `}</style>
-      <div className="flex w-full gap-3">
-        {/* Actions */}
-        <div className="relative min-w-0 flex-1 rounded-xl border border-border bg-background p-1.5">
-          {/* Animated selection */}
+        {ACTIONS.map(({ label }, index) => (
           <div
-            className="
-              pointer-events-none
-              absolute left-1.5 right-1.5 top-1.5
-              h-9
-              rounded-lg
-              border border-primary/30
-              bg-primary/10
-              opacity-0
-              group-hover:opacity-100
-              group-hover:[animation:action-selector_6s_ease-in-out_infinite]
-            "
-          />
-
-          <div className="relative flex flex-col gap-1">
-            {LABELS.map((label, index) => (
-              <div
-                key={label}
-                className={`
-                  flex h-9 items-center
-                  rounded-lg px-3
-                  text-xs
-                  transition-all duration-300
-                  group-hover:[animation:label-pulse_6s_ease-in-out_infinite]
-                  group-hover:[animation-delay:${index * 1.5}s]
-                `}
-              >
-                <span className="text-muted-foreground transition-colors duration-300">
-                  {label}
-                </span>
-              </div>
-            ))}
+            key={label}
+            onPointerEnter={(event) => {
+              if (event.pointerType === "mouse") setPointed(index);
+            }}
+            style={{ height: ROW_HEIGHT }}
+            className={`relative flex items-center px-3 text-xs transition-colors duration-150 ${
+              index === current
+                ? "font-medium text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {label}
           </div>
-        </div>
-
-        {/* Document */}
-        <div className="relative hidden w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-card p-4 sm:block">
-          {RESULTS.map((item, index) => (
-            <div
-              key={index}
-              className="absolute inset-4 opacity-0 group-hover:[animation:document-result_6s_ease-in-out_infinite]"
-              style={{
-                animationDelay: `${index * 1.5}s`,
-              }}
-            >
-              <DocLines highlight={item.highlight} />
-            </div>
-          ))}
-
-          {/* Document scan line */}
-          <div
-            className="
-              pointer-events-none
-              absolute left-3 right-3 top-3
-              h-px
-              bg-primary/40
-              opacity-0
-              group-hover:opacity-100
-              group-hover:[animation:document-scan_6s_ease-in-out_infinite]
-            "
-          />
-        </div>
-
-        {/* Result */}
-        <div className="relative flex w-52 shrink-0 flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-4">
-          <div className="relative h-14">
-            {RESULTS.map((item, index) => (
-              <div
-                key={index}
-                className="
-                  absolute inset-0
-                  opacity-0
-                  group-hover:[animation:result-show_6s_ease-in-out_infinite]
-                "
-                style={{
-                  animationDelay: `${index * 1.5}s`,
-                }}
-              >
-                {item.result}
-              </div>
-            ))}
-          </div>
-
-          <div className="relative h-5 border-t border-border pt-2">
-            {RESULTS.map((item, index) => (
-              <span
-                key={index}
-                className="
-                  absolute inset-x-0
-                  font-mono text-[10px]
-                  text-muted-foreground
-                  opacity-0
-                  group-hover:[animation:result-show_6s_ease-in-out_infinite]
-                "
-                style={{
-                  animationDelay: `${index * 1.5}s`,
-                }}
-              >
-                {item.source}
-              </span>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
-    </>
+
+      <div className="relative flex min-h-44 min-w-0 flex-1 flex-col rounded-xl bg-background p-4 ring-1 ring-border">
+        <div className="relative flex-1">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={current}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="absolute inset-x-0 top-0"
+            >
+              {result}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <p className="flex items-center gap-1.5 border-t border-border pt-3 font-mono text-[10px] text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-primary" />
+          {source}
+        </p>
+      </div>
+    </div>
   );
 }
