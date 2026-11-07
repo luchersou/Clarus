@@ -28,7 +28,7 @@ const START_LINE = "0px 0px -40% 0px";
 
 const EXTRACTED_VALUES = [
   { field: "Total amount", value: "$48,750.00" },
-  { field: "Due date", value: "Oct 15, 2026" },
+  { field: "Due date", value: "Oct 15, 2027" },
   { field: "Late fee", value: "2% per month" },
 ];
 
@@ -112,7 +112,7 @@ function DocumentPane() {
 
         <p className="mt-2">
           3.2 Payment is due in full on or before{" "}
-          <Highlight n={2}>Oct 15, 2026</Highlight>, by wire transfer to the
+          <Highlight n={2}>Oct 15, 2027</Highlight>, by wire transfer to the
           account named in the invoice.
         </p>
 

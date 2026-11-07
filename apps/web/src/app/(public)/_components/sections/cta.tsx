@@ -77,7 +77,7 @@ export function CTA() {
                     </div>
                     <div>
                       <div className="text-white font-medium mb-1 tracking-wide">
-                        Supplier_Contract.pdf
+                        Supplier_Contract_2026.pdf
                       </div>
                       <div className="text-xs text-primary flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
@@ -92,8 +92,8 @@ export function CTA() {
 
                 <div className="space-y-3">
                   {[
-                    { field: "Total amount", value: "$4,820.00" },
-                    { field: "Due date", value: "Oct 15, 2026" },
+                    { field: "Total amount", value: "$48,750.00" },
+                    { field: "Due date", value: "Oct 15, 2027" },
                     { field: "Late fee", value: "2% per month" },
                   ].map(({ field, value }, i) => (
                     <Reveal

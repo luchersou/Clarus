@@ -25,7 +25,7 @@ const ACTIONS: { label: string; source: string; result: ReactNode }[] = [
     result: (
       <p className="text-xs leading-relaxed text-foreground/90">
         12-month supply agreement worth $48,750, payable in full by Oct 15,
-        2026.
+        2027.
       </p>
     ),
   },
@@ -35,7 +35,7 @@ const ACTIONS: { label: string; source: string; result: ReactNode }[] = [
     result: (
       <div className="space-y-2.5">
         <ResultRow label="Total amount" value="$48,750.00" />
-        <ResultRow label="Due date" value="Oct 15, 2026" />
+        <ResultRow label="Due date" value="Oct 15, 2027" />
         <ResultRow label="Late fee" value="2% per month" />
       </div>
     ),
@@ -45,7 +45,7 @@ const ACTIONS: { label: string; source: string; result: ReactNode }[] = [
     source: "Pages 4–5",
     result: (
       <div className="space-y-2.5">
-        <ResultRow label="Payment due" value="Oct 15, 2026" />
+        <ResultRow label="Payment due" value="Oct 15, 2027" />
         <ResultRow label="Inspection" value="10 business days" />
       </div>
     ),
