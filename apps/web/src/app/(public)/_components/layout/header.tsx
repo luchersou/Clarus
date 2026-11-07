@@ -23,6 +23,7 @@ export function Header() {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+    setMobileOpen(false);
   };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
@@ -103,7 +104,16 @@ export function Header() {
       {/* Mobile drawer menu */}
       <AnimatePresence>
         {mobileOpen && (
+          <div
+            key="mobile-backdrop"
+            aria-hidden="true"
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 z-30 sm:hidden"
+          />
+        )}
+        {mobileOpen && (
           <motion.div
+            key="mobile-drawer"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
