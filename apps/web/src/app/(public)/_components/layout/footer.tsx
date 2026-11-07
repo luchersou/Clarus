@@ -18,10 +18,10 @@ export function Footer() {
       </div>
 
       {/* 2. Giant Background Text Layer */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center translate-y-[20%] pointer-events-none select-none overflow-hidden">
-        <h1 className="text-[16vw] font-black tracking-tighter text-foreground dark:text-foreground/40 whitespace-nowrap">
+      <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center translate-y-[20%] pointer-events-none select-none overflow-hidden">
+        <div className="text-[16vw] font-black tracking-tighter text-foreground dark:text-foreground/40 whitespace-nowrap">
           Clarus
-        </h1>
+        </div>
       </div>
 
       {/* 3. The Spreading Blur / Gradient Fade Layer */}

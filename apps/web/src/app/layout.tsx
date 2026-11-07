@@ -18,10 +18,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const TITLE = "Clarus — AI-powered document analysis";
+const DESCRIPTION =
+  "Upload documents, run structured AI analyses, and chat with your files in plain language.";
+
 export const metadata: Metadata = {
-  title: "Clarus — AI-powered documents analysis",
-  description:
-    "Upload documents, run structured AI analyses, and chat with your files in plain language.",
+  metadataBase: new URL("https://clarus-delta.vercel.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "Clarus",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
   icons: {
     icon: "/logo.svg",
   },
