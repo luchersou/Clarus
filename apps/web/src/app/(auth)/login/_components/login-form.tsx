@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { useActionState, useState } from "react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginWithPassword, type LoginState } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ export function LoginForm() {
     INITIAL_STATE,
   );
 
+  const [showPassword, setShowPassword] = useState(false);
   const invalid = Boolean(state.error);
 
   return (
@@ -37,17 +38,30 @@ export function LoginForm() {
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          autoComplete="current-password"
-          aria-invalid={invalid || undefined}
-          aria-describedby={invalid ? "login-error" : undefined}
-          required
-          className="h-10"
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            aria-invalid={invalid || undefined}
+            aria-describedby={invalid ? "login-error" : undefined}
+            required
+            className="h-10 pr-10"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowPassword((s) => !s)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            className="absolute top-1 right-1 text-muted-foreground"
+          >
+            {showPassword ? <EyeOff /> : <Eye />}
+          </Button>
+        </div>
       </div>
 
       {state.error && (
