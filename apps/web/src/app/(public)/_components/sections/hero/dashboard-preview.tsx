@@ -1,8 +1,9 @@
 "use client";
 
-import type { PointerEvent, ReactNode } from "react";
+import { useRef, type PointerEvent, type ReactNode } from "react";
 import {
   motion,
+  useInView,
   useMotionValue,
   useReducedMotion,
   useSpring,
@@ -12,13 +13,18 @@ import { ArrowUp, CalendarClock, Check, FileText } from "lucide-react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-// Timeline of the scene, in seconds after the page loads
+// Timeline of the scene, in seconds after it starts
 const QUESTION_AT = 0.9;
 const READING_AT = 1.3;
 const ANSWER_AT = 2.1;
 const STEP = 0.22;
 
 const MAX_TILT = 2.5;
+
+// The scene starts once the top of the window passes 60% of the viewport height.
+// A line instead of a visible percentage, so it also fires on screens too short
+// to show most of the window at once.
+const START_LINE = "0px 0px -40% 0px";
 
 const EXTRACTED_VALUES = [
   { field: "Total amount", value: "$48,750.00" },
@@ -35,9 +41,14 @@ const ACTIONS = [
 
 function fadeUp(delay: number) {
   return {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: EASE, delay },
+    variants: {
+      hidden: { opacity: 0, y: 8 },
+      show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: EASE, delay },
+      },
+    },
   };
 }
 
@@ -55,16 +66,24 @@ function Highlight({ n, children }: { n: number; children: ReactNode }) {
   return (
     <span className="relative inline-block whitespace-nowrap px-0.5 font-medium text-foreground">
       <motion.span
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.5, ease: EASE, delay }}
+        variants={{
+          hidden: { scaleX: 0 },
+          show: {
+            scaleX: 1,
+            transition: { duration: 0.5, ease: EASE, delay },
+          },
+        }}
         className="absolute inset-0 origin-left rounded-[3px] bg-primary/15"
       />
       <span className="relative">{children}</span>
       <motion.sup
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: delay + 0.3 }}
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: { duration: 0.3, delay: delay + 0.3 },
+          },
+        }}
         className="relative ml-0.5 font-mono text-[8px] font-semibold text-primary"
       >
         {n}
@@ -146,12 +165,16 @@ function AnswerPane() {
           <div className="relative min-w-0 flex-1">
             {/* Shown only while the document is being read */}
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 1, 0] }}
-              transition={{
-                duration: ANSWER_AT - READING_AT,
-                times: [0, 0.2, 0.8, 1],
-                delay: READING_AT,
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: [0, 1, 1, 0],
+                  transition: {
+                    duration: ANSWER_AT - READING_AT,
+                    times: [0, 0.2, 0.8, 1],
+                    delay: READING_AT,
+                  },
+                },
               }}
               className="absolute left-0 top-1 text-xs text-muted-foreground"
             >
@@ -240,6 +263,9 @@ function AnswerPane() {
 export function DashboardPreview() {
   const reduceMotion = useReducedMotion();
 
+  const previewRef = useRef<HTMLDivElement>(null);
+  const started = useInView(previewRef, { once: true, margin: START_LINE });
+
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
   const spring = { stiffness: 120, damping: 20, mass: 0.6 };
@@ -269,6 +295,7 @@ export function DashboardPreview() {
 
   return (
     <div
+      ref={previewRef}
       role="img"
       aria-label="Clarus answering a question about a supplier contract, with each value linked to the clause it came from."
       onPointerMove={handlePointerMove}
@@ -276,6 +303,8 @@ export function DashboardPreview() {
       className="@container relative w-full"
     >
       <motion.div
+        initial="hidden"
+        animate={started ? "show" : "hidden"}
         style={{ rotateX, rotateY, transformPerspective: 1800 }}
         className="rounded-[1.25rem] bg-foreground/[0.04] p-1.5 shadow-[0_40px_80px_-32px_rgb(0_0_0/0.28),0_16px_32px_-20px_rgb(0_0_0/0.14)] ring-1 ring-foreground/[0.06] will-change-transform"
       >
