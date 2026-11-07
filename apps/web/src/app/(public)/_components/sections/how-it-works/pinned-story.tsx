@@ -422,7 +422,7 @@ function Stage({ progress }: Progress) {
       ref={stageRef}
       role="img"
       aria-label="A supplier contract is uploaded and read, the Extract values action is chosen, and each value is linked back to its clause on the page."
-      className="relative h-[min(calc(100svh-8rem),38rem)] w-full overflow-hidden rounded-3xl bg-gray-100 ring-1 ring-foreground/5"
+      className="relative order-1 h-[min(calc(100svh-8rem),38rem)] w-full overflow-hidden rounded-3xl bg-gray-100 ring-1 ring-foreground/5"
     >
       <div className="pointer-events-none absolute inset-0 text-foreground/[0.07] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:52px_52px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
@@ -526,8 +526,9 @@ export function PinnedStory() {
       className="relative hidden h-[340svh] lg:motion-safe:block"
     >
       <div className="sticky top-0 flex h-svh items-center">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,4fr)_minmax(0,7fr)] items-center gap-14 px-10 pt-20 2xl:max-w-[88rem]">
-          <div>
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,7fr)_minmax(0,4fr)] items-center gap-14 px-10 pt-20 2xl:max-w-[88rem]">
+          {/* Mirrors the hero. The text stays first in the DOM for reading order */}
+          <div className="order-2">
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
               How it works
             </h2>
