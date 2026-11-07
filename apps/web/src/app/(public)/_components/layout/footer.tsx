@@ -64,14 +64,6 @@ export function Footer() {
               <Link href="/#faq" className="hover:text-primary transition-colors">FAQ</Link>
             </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-xs md:text-sm mb-4">Legal</h4>
-            <div className="flex flex-col gap-3 text-xs text-foreground">
-              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-              <Link href="mailto:support@clarus.com" className="hover:text-primary transition-colors">Contact Support</Link>
-            </div>
-          </div>
         </div>
       </div>
 

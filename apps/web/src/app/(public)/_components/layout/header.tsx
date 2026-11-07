@@ -139,7 +139,7 @@ export function Header() {
                   Log in
                 </Button>
               </Link>
-              <Link href="/registro" onClick={() => setMobileOpen(false)}>
+              <Link href="/login" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full h-10 text-sm font-medium">Get started</Button>
               </Link>
             </div>
