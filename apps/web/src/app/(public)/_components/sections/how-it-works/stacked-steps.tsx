@@ -140,7 +140,7 @@ export function StackedSteps() {
   const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <div className="px-6 py-20 md:py-28 lg:motion-safe:hidden">
+    <div className="px-6 pb-28 pt-20 md:pb-32 md:pt-28 lg:motion-safe:hidden">
       <div className="mx-auto max-w-xl">
         <motion.h2
           {...reveal()}
