@@ -16,7 +16,7 @@ const FAQS = [
   },
   {
     q: "How is this different from just using a chatbot?",
-    a: "Instead of writing prompts, you pick from a fixed set of actions — Summary, Extract values, Deadlines, or Compare. This keeps results consistent and predictable, instead of depending on how a question is phrased.",
+    a: "Clarus has a chat too, but its answers are grounded in your own documents, not generated freely. And for recurring work you can skip the prompt: Summary, Extract values, Deadlines, and Compare give consistent results, however the question would have been phrased.",
   },
   {
     q: "Is my data secure and private?",

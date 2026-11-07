@@ -29,7 +29,7 @@ export function CTA() {
               </h2>
 
               <p className="text-sm md:text-lg text-white/50 mb-10 md:mb-12 font-light leading-relaxed">
-                Upload your first document and see a structured answer in seconds — no setup, no configuration.
+                Upload your first document and get a structured answer — no setup, no configuration.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">

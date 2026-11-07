@@ -3,7 +3,7 @@ export const STEPS = [
     number: "01",
     title: "Upload your document",
     description:
-      "Drop a contract, invoice, or financial report. Clarus reads it in seconds.",
+      "Drop a contract, invoice, or financial report. Clarus reads every page for you.",
   },
   {
     number: "02",
