@@ -1,498 +1,309 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import type { PointerEvent, ReactNode } from "react";
 import {
-  Home,
-  FileText,
-  BarChart3,
-  GitCompare,
-  Settings,
-  CheckCircle2,
-  Clock3,
-  Sparkles,
-  ArrowUpRight,
-  ShieldCheck,
-  Zap,
-} from "lucide-react";
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from "motion/react";
+import { ArrowUp, CalendarClock, Check, FileText } from "lucide-react";
 
-const NAV_ITEMS = [
-  { label: "Home", icon: Home, active: true },
-  { label: "Documents", icon: FileText },
-  { label: "Analytics", icon: BarChart3 },
-  { label: "Comparisons", icon: GitCompare },
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Timeline of the scene, in seconds after the page loads
+const QUESTION_AT = 0.9;
+const READING_AT = 1.3;
+const ANSWER_AT = 2.1;
+const STEP = 0.22;
+
+const MAX_TILT = 2.5;
+
+const EXTRACTED_VALUES = [
+  { field: "Total amount", value: "$48,750.00" },
+  { field: "Due date", value: "Oct 15, 2026" },
+  { field: "Late fee", value: "2% per month" },
 ];
 
 const ACTIONS = [
   { label: "Summary", active: false },
-  { label: "Value extraction", active: true },
-  { label: "Due date check", active: false },
-  { label: "Comparison", active: false },
+  { label: "Extract values", active: true },
+  { label: "Deadlines", active: false },
+  { label: "Compare", active: false },
 ];
 
-const EXTRACTED_VALUES = [
-  { field: "Total amount", value: "$ 48,750.00" },
-  { field: "Due date", value: "10/15/2026" },
-  { field: "Late fee", value: "2% per month" },
-];
+function fadeUp(delay: number) {
+  return {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: EASE, delay },
+  };
+}
 
-const METRICS = [
-  {
-    label: "Documents processed",
-    value: "1,284",
-    change: "+12.8%",
-    icon: FileText,
-  },
-  {
-    label: "Values extracted",
-    value: "8,492",
-    change: "+18.4%",
-    icon: Sparkles,
-  },
-  {
-    label: "Avg. processing time",
-    value: "2.4s",
-    change: "-31.2%",
-    icon: Zap,
-  },
-];
+function Citation({ n }: { n: number }) {
+  return (
+    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/10 font-mono text-[9px] font-semibold text-primary">
+      {n}
+    </span>
+  );
+}
 
-export function DashboardPreview() {
-  const dashboardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const dashboard = dashboardRef.current;
-
-    if (!dashboard) return;
-
-    const handleMouseMove = (event: MouseEvent) => {
-      const rect = dashboard.getBoundingClientRect();
-
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      // Normalizes position between -1 and 1
-      const normalizedX = (x / rect.width - 0.5) * 2;
-      const normalizedY = (y / rect.height - 0.5) * 2;
-
-      // Maximum tilt intensity
-      const maxTilt = 3;
-
-      const rotateY = normalizedX * maxTilt;
-      const rotateX = -normalizedY * maxTilt;
-
-      dashboard.style.transform = `
-        perspective(1800px)
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-        scale3d(1.01, 1.01, 1.01)
-      `;
-    };
-
-    const handleMouseLeave = () => {
-      dashboard.style.transform = `
-        perspective(1800px)
-        rotateX(0deg)
-        rotateY(0deg)
-        scale3d(1, 1, 1)
-      `;
-    };
-
-    dashboard.addEventListener("mousemove", handleMouseMove);
-    dashboard.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      dashboard.removeEventListener("mousemove", handleMouseMove);
-      dashboard.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, []);
+function Highlight({ n, children }: { n: number; children: ReactNode }) {
+  const delay = ANSWER_AT + (n - 1) * STEP;
 
   return (
-    <section className="hidden sm:block relative w-full max-w-6xl mx-auto px-4 pt-12">
-      {/* Dashboard container */}
-      
-      <div className="relative">
-        {/* Interactive dashboard */}
-        <div
-          ref={dashboardRef}
-          className="
-            relative
-            rounded-2xl
-            border
-            border-border
-            bg-card
-            overflow-hidden
-            will-change-transform
-            shadow-[0_-15px_35px_-20px_rgba(0,0,0,0.35),-15px_0_30px_-20px_rgba(0,0,0,0.25),15px_0_30px_-20px_rgba(0,0,0,0.25)]
-          "
-          style={{
-            transform:
-              "perspective(1800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-            transition: "transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)",
-            transformStyle: "preserve-3d",
-          }}
-        >
-          {/* Browser top bar */}
-          <div className="flex items-center px-6 py-4 border-b border-border bg-muted/40">
-            <div className="flex space-x-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
-            </div>
+    <span className="relative inline-block whitespace-nowrap px-0.5 font-medium text-foreground">
+      <motion.span
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 0.5, ease: EASE, delay }}
+        className="absolute inset-0 origin-left rounded-[3px] bg-primary/15"
+      />
+      <span className="relative">{children}</span>
+      <motion.sup
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: delay + 0.3 }}
+        className="relative ml-0.5 font-mono text-[8px] font-semibold text-primary"
+      >
+        {n}
+      </motion.sup>
+    </span>
+  );
+}
 
-            <div className="mx-auto flex items-center gap-2 px-4 py-1.5 rounded-md bg-background border border-border">
-              <div className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+function DocumentPane() {
+  return (
+    <div className="relative hidden w-[46%] shrink-0 overflow-hidden border-r border-border bg-muted/60 px-5 pt-5 @xl:block">
+      <div className="h-full rounded-t-md bg-background px-5 pt-5 font-[family-name:var(--font-geist)] text-[10.5px] leading-[1.7] text-muted-foreground shadow-[0_0_0_1px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.18)]">
+        <p className="text-[9px] font-medium tracking-[0.16em] text-muted-foreground/80">
+          SUPPLY AGREEMENT
+        </p>
 
-              <span className="text-[10px] text-muted-foreground tracking-widest font-mono">
-                app.clarus.com/dashboard
-              </span>
-            </div>
-          </div>
+        <p className="mt-4 text-[11.5px] font-semibold text-foreground">
+          3. Payment terms
+        </p>
 
-          {/* Dashboard */}
-          <div className="flex min-h-[680px] bg-background">
-            {/* Sidebar */}
-            <div className="hidden md:flex w-56 shrink-0 border-r border-border flex-col py-6 px-3 bg-muted/20">
-              <div className="px-3 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center size-7 rounded-lg bg-primary text-primary-foreground">
-                    <Sparkles className="size-3.5" />
-                  </div>
+        <p className="mt-2">
+          3.1 The Buyer shall pay the Supplier a total of{" "}
+          <Highlight n={1}>$48,750.00</Highlight> for the goods listed in
+          Schedule A.
+        </p>
 
-                  <span className="text-lg font-semibold tracking-tight">
-                    Clarus
+        <p className="mt-2">
+          3.2 Payment is due in full on or before{" "}
+          <Highlight n={2}>Oct 15, 2026</Highlight>, by wire transfer to the
+          account named in the invoice.
+        </p>
+
+        <p className="mt-2">
+          3.3 Overdue amounts accrue a late fee of{" "}
+          <Highlight n={3}>2% per month</Highlight> until paid in full.
+        </p>
+
+        <p className="mt-4 text-[11.5px] font-semibold text-foreground">
+          4. Delivery
+        </p>
+
+        <p className="mt-2">
+          4.1 The Supplier shall deliver the goods to the address agreed by both
+          parties, within the period set out in Schedule B.
+        </p>
+
+        <p className="mt-2">
+          4.2 Risk in the goods passes to the Buyer on delivery, and title
+          passes once payment has been received in full.
+        </p>
+
+        <p className="mt-2">
+          4.3 The Buyer may inspect the goods within ten business days of
+          delivery and reject any that do not conform to this agreement.
+        </p>
+      </div>
+
+      {/* The page continues below the window */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-muted to-transparent" />
+    </div>
+  );
+}
+
+function AnswerPane() {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col bg-background">
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 @xl:p-5">
+        <motion.div {...fadeUp(QUESTION_AT)} className="flex justify-end">
+          <p className="max-w-[85%] rounded-2xl rounded-br-md bg-foreground px-3.5 py-2 text-xs text-background">
+            What do we owe, and by when?
+          </p>
+        </motion.div>
+
+        <div className="relative flex gap-2.5">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
+            C
+          </span>
+
+          <div className="relative min-w-0 flex-1">
+            {/* Shown only while the document is being read */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 1, 0] }}
+              transition={{
+                duration: ANSWER_AT - READING_AT,
+                times: [0, 0.2, 0.8, 1],
+                delay: READING_AT,
+              }}
+              className="absolute left-0 top-1 text-xs text-muted-foreground"
+            >
+              Reading page 4…
+            </motion.p>
+
+            <motion.p
+              {...fadeUp(ANSWER_AT)}
+              className="pt-1 text-xs leading-relaxed text-foreground"
+            >
+              These are the payment terms in your contract:
+            </motion.p>
+
+            <div className="mt-3 divide-y divide-border overflow-hidden rounded-xl">
+              {EXTRACTED_VALUES.map(({ field, value }, index) => (
+                <motion.div
+                  key={field}
+                  {...fadeUp(ANSWER_AT + (index + 1) * STEP)}
+                  className="flex items-center gap-2 bg-muted/60 px-3 py-2.5"
+                >
+                  <Citation n={index + 1} />
+
+                  <span className="truncate text-[11px] text-muted-foreground">
+                    {field}
                   </span>
-                </div>
-              </div>
 
-              <div className="space-y-1 flex-1">
-                {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
-                  <div
-                    key={label}
-                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
-                      active
-                        ? "bg-foreground text-background shadow-sm"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className="size-4 mr-3" />
-
-                    {label}
-
-                    {label === "Documents" && (
-                      <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                        12
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-border pt-4 px-3">
-                <div className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                  <Settings className="size-4 mr-3" />
-                  Settings
-                </div>
-              </div>
-            </div>
-
-            {/* Main */}
-            <div className="flex-1 min-w-0 p-7">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold">
-                      Document intelligence
-                    </p>
-
-                    <span className="flex items-center gap-1 text-[10px] font-medium text-green-600 dark:text-green-400">
-                      <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-                      Live
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground mt-1">
-                    AI-powered document analysis
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <ShieldCheck className="size-3.5" />
-                  Secure processing
-                </div>
-              </div>
-
-              {/* Metrics */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {METRICS.map(({ label, value, change, icon: Icon }) => (
-                  <div
-                    key={label}
-                    className="
-                      rounded-xl
-                      border
-                      border-border
-                      bg-card
-                      p-4
-                      transition-all
-                      duration-300
-                      hover:-translate-y-0.5
-                      hover:shadow-md
-                    "
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center justify-center size-7 rounded-lg bg-muted">
-                        <Icon className="size-3.5 text-muted-foreground" />
-                      </div>
-
-                      <span className="text-[10px] font-medium text-green-600 dark:text-green-400">
-                        {change}
-                      </span>
-                    </div>
-
-                    <p className="text-lg font-semibold tracking-tight">
-                      {value}
-                    </p>
-
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Document header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium">
-                    Supplier_Contract_2026.pdf
-                  </p>
-
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-muted-foreground">
-                      Processed 2 minutes ago
-                    </p>
-
-                    <span className="text-muted-foreground">•</span>
-
-                    <div className="flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400">
-                      <CheckCircle2 className="size-3" />
-                      Analysis complete
-                    </div>
-                  </div>
-                </div>
-
-                <button className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">
-                  View document
-                  <ArrowUpRight className="size-3" />
-                </button>
-              </div>
-
-              {/* Action pills */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {ACTIONS.map(({ label, active }) => (
-                  <div
-                    key={label}
-                    className={`px-3.5 py-1.5 rounded-full text-xs transition-all duration-300 cursor-pointer ${
-                      active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground border border-border hover:bg-muted"
-                    }`}
-                  >
-                    {label}
-                  </div>
-                ))}
-              </div>
-
-              {/* Analysis area */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Document preview */}
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <div className="flex items-center gap-2">
-                      <FileText className="size-3.5 text-muted-foreground" />
-
-                      <span className="text-xs font-medium">
-                        Contract preview
-                      </span>
-                    </div>
-
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      PAGE 04
-                    </span>
-                  </div>
-
-                  <div className="relative h-[190px] p-5 bg-muted/20 overflow-hidden">
-                    <div className="relative h-full rounded-md bg-background border border-border p-4 shadow-sm">
-                      <div className="w-24 h-2 rounded bg-foreground/80 mb-4" />
-
-                      <div className="space-y-2">
-                        <div className="w-full h-1.5 rounded bg-muted" />
-                        <div className="w-[92%] h-1.5 rounded bg-muted" />
-                        <div className="w-[80%] h-1.5 rounded bg-muted" />
-                      </div>
-
-                      <div className="mt-5 space-y-2">
-                        <div className="w-[65%] h-1.5 rounded bg-muted" />
-                        <div className="w-full h-1.5 rounded bg-muted" />
-                        <div className="w-[88%] h-1.5 rounded bg-muted" />
-                      </div>
-
-                      {/* AI highlighted value */}
-                      <div className="absolute left-4 top-[104px] w-[115px] h-5 rounded bg-primary/10 border border-primary/20 animate-pulse" />
-
-                      <div className="absolute left-4 top-[107px] w-[92px] h-1.5 rounded bg-primary/30" />
-
-                      {/* AI indicator */}
-                      <div className="absolute right-4 bottom-4 flex items-center gap-1.5 rounded-full bg-background border border-border px-2 py-1 shadow-sm">
-                        <Sparkles className="size-2.5 text-primary" />
-
-                        <span className="text-[8px] font-medium">
-                          AI analyzing
-                        </span>
-
-                        <span className="size-1 rounded-full bg-primary animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Extracted values */}
-                <div className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <p className="text-xs font-medium">
-                        Values identified in document
-                      </p>
-
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        Extracted automatically by Clarus AI
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">
-                      <Sparkles className="size-3" />
-
-                      <span className="text-[9px] font-medium">
-                        98.7% confidence
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {EXTRACTED_VALUES.map(({ field, value }) => (
-                      <div
-                        key={field}
-                        className="
-                          flex
-                          items-center
-                          justify-between
-                          rounded-lg
-                          border
-                          border-border
-                          bg-muted/20
-                          px-3
-                          py-2.5
-                          transition-all
-                          duration-300
-                          hover:bg-muted/40
-                        "
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="size-1.5 rounded-full bg-primary animate-pulse" />
-
-                          <span className="text-xs text-muted-foreground">
-                            {field}
-                          </span>
-                        </div>
-
-                        <span className="text-xs font-mono font-medium">
-                          {value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Processing info */}
-                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <Clock3 className="size-3" />
-                      Processed in 2.4s
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[10px] font-medium">
-                      <CheckCircle2 className="size-3 text-green-500" />
-                      Ready to use
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Processing activity */}
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="col-span-2 rounded-xl border border-border bg-card px-4 py-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="size-3.5 text-muted-foreground" />
-
-                      <span className="text-xs font-medium">
-                        Processing activity
-                      </span>
-                    </div>
-
-                    <span className="text-[10px] text-muted-foreground">
-                      Last 7 days
-                    </span>
-                  </div>
-
-                  <div className="flex items-end gap-1.5 h-12">
-                    <div className="w-full rounded-sm bg-primary/15 h-[35%]" />
-                    <div className="w-full rounded-sm bg-primary/20 h-[55%]" />
-                    <div className="w-full rounded-sm bg-primary/25 h-[45%]" />
-                    <div className="w-full rounded-sm bg-primary/30 h-[70%]" />
-                    <div className="w-full rounded-sm bg-primary/40 h-[60%]" />
-                    <div className="w-full rounded-sm bg-primary/50 h-[82%]" />
-                    <div className="w-full rounded-sm bg-primary h-[100%]" />
-                  </div>
-                </div>
-
-                {/* AI insight */}
-                <div className="rounded-xl border border-border bg-card px-4 py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="size-3.5 text-primary" />
-
-                    <span className="text-xs font-medium">
-                      AI insight
-                    </span>
-                  </div>
-
-                  <p className="text-[10px] leading-relaxed text-muted-foreground">
-                    Contract values were extracted with high confidence.
-                  </p>
-                </div>
-              </div>
-
-              {/* Bottom status */}
-              <div className="flex items-center justify-between mt-4 px-1">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-1.5">
-                    <div className="size-5 rounded-full bg-muted border-2 border-background" />
-                    <div className="size-5 rounded-full bg-muted-foreground/30 border-2 border-background" />
-                    <div className="size-5 rounded-full bg-primary/40 border-2 border-background" />
-                  </div>
-
-                  <span className="text-[10px] text-muted-foreground">
-                    3 AI agents analyzed this document
+                  <span className="ml-auto whitespace-nowrap font-mono text-[11px] font-medium">
+                    {value}
                   </span>
-                </div>
-
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  CLARUS AI / v2.4
-                </span>
-              </div>
+                </motion.div>
+              ))}
             </div>
+
+            <motion.p
+              {...fadeUp(ANSWER_AT + 4 * STEP)}
+              className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground"
+            >
+              <Check className="size-3 text-primary" />
+              Traced to page 4, clause 3
+            </motion.p>
+
+            <motion.div
+              {...fadeUp(ANSWER_AT + 5 * STEP)}
+              className="mt-3 hidden items-center gap-2.5 rounded-xl bg-primary/[0.07] px-3 py-2.5 sm:flex"
+            >
+              <CalendarClock className="size-3.5 shrink-0 text-primary" />
+
+              <p className="text-[11px] leading-snug text-foreground/80">
+                Late fees start if payment misses Oct 15.
+              </p>
+            </motion.div>
           </div>
         </div>
       </div>
-    </section>
+
+      <div className="p-3 pt-0 @xl:px-5 @xl:pb-4">
+        <div className="mb-2.5 hidden gap-1.5 sm:flex">
+          {ACTIONS.map(({ label, active }) => (
+            <span
+              key={label}
+              className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground ring-1 ring-inset ring-border"
+              }`}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl bg-background py-1.5 pl-3.5 pr-1.5 shadow-[0_0_0_1px_var(--border),0_2px_6px_-2px_rgb(0_0_0/0.06)]">
+          <span className="truncate text-[11px] text-muted-foreground">
+            Ask about this document…
+          </span>
+
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <ArrowUp className="size-3.5" />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardPreview() {
+  const reduceMotion = useReducedMotion();
+
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const spring = { stiffness: 120, damping: 20, mass: 0.6 };
+  const rotateY = useSpring(
+    useTransform(pointerX, [-1, 1], [-MAX_TILT, MAX_TILT]),
+    spring,
+  );
+  const rotateX = useSpring(
+    useTransform(pointerY, [-1, 1], [MAX_TILT, -MAX_TILT]),
+    spring,
+  );
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (reduceMotion || event.pointerType !== "mouse") return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    // Normalizes position between -1 and 1
+    pointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
+    pointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+  };
+
+  const handlePointerLeave = () => {
+    pointerX.set(0);
+    pointerY.set(0);
+  };
+
+  return (
+    <div
+      role="img"
+      aria-label="Clarus answering a question about a supplier contract, with each value linked to the clause it came from."
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      className="@container relative w-full"
+    >
+      <motion.div
+        style={{ rotateX, rotateY, transformPerspective: 1800 }}
+        className="rounded-[1.25rem] bg-foreground/[0.04] p-1.5 shadow-[0_40px_80px_-32px_rgb(0_0_0/0.28),0_16px_32px_-20px_rgb(0_0_0/0.14)] ring-1 ring-foreground/[0.06] will-change-transform"
+      >
+        <div className="flex h-[25rem] flex-col overflow-hidden rounded-[0.875rem] bg-background ring-1 ring-foreground/[0.08] sm:h-[31rem] lg:h-[clamp(26rem,calc(100svh-11rem),33rem)]">
+          {/* Window bar */}
+          <div className="flex h-10 shrink-0 items-center gap-3 border-b border-border px-4">
+            <div className="flex gap-1.5">
+              <span className="size-2.5 rounded-full bg-foreground/10" />
+              <span className="size-2.5 rounded-full bg-foreground/10" />
+              <span className="size-2.5 rounded-full bg-foreground/10" />
+            </div>
+
+            <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium">
+              <FileText className="size-3 shrink-0 text-muted-foreground" />
+              <span className="truncate">Supplier_Contract_2026.pdf</span>
+            </div>
+
+            <span className="ml-auto hidden whitespace-nowrap font-mono text-[10px] text-muted-foreground @md:block">
+              Page 4 of 12
+            </span>
+          </div>
+
+          <div className="flex min-h-0 flex-1">
+            <DocumentPane />
+            <AnswerPane />
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }
