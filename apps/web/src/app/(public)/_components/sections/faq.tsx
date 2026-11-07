@@ -16,7 +16,7 @@ const FAQS = [
   },
   {
     q: "How is this different from just using a chatbot?",
-    a: "Instead of writing prompts, you pick from a fixed set of actions — Summary, Extract values, Deadlines, or Compare. This keeps results consistent and predictable, instead of depending on how a question is phrased.",
+    a: "Clarus has a chat too, but its answers are grounded in your own documents, not generated freely. And for recurring work you can skip the prompt: Summary, Extract values, Deadlines, and Compare give consistent results, however the question would have been phrased.",
   },
   {
     q: "Is my data secure and private?",
@@ -35,22 +35,22 @@ function FaqItem({
   index: number;
   isLast: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(index === 0);
   const panelId = `faq-panel-${index}`;
 
   return (
     <Reveal
       y={16}
       delay={index * 0.08}
-      className={cn("overflow-hidden mx-4", !isLast && "border-b border-foreground/5")}
+      className={cn("overflow-hidden mx-5 md:mx-6", !isLast && "border-b border-foreground/10")}
     >
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="w-full flex items-center justify-between gap-4 p-2 md:p-4 text-left select-none group/faq-btn transition-colors duration-200 cursor-pointer"
+        className="w-full flex items-center justify-between gap-4 py-4 md:py-5 text-left select-none group/faq-btn transition-colors duration-200 cursor-pointer"
       >
-        <span className="text-xs md:text-sm text-foreground group-hover/faq-btn:text-primary transition-colors duration-200">
+        <span className="text-sm md:text-base font-medium text-foreground group-hover/faq-btn:text-primary transition-colors duration-200">
           {q}
         </span>
         <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-foreground/3 group-hover/faq-btn:bg-foreground/8 transition-colors duration-200 shrink-0">
@@ -73,7 +73,7 @@ function FaqItem({
         )}
       >
         <div className="overflow-hidden">
-          <div className="pb-4 md:pb-6 px-2 md:px-4 text-xs md:text-sm text-muted-foreground leading-relaxed pr-8">
+          <div className="pb-5 pr-10 text-sm leading-relaxed text-foreground/70">
             {a}
           </div>
         </div>
@@ -84,21 +84,19 @@ function FaqItem({
 
 export function FAQ() {
   return (
-    <Reveal className="py-16 md:py-28 relative z-10">
-      <div id="faq" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1.5 md:mb-3">
-            FAQ
-          </p>
-          <h2 className="text-lg md:text-3xl font-extrabold tracking-tight text-foreground mb-2 md:mb-4">
-            Frequently Asked Questions
+    <Reveal className="py-20 md:py-28">
+      <div id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 md:px-6">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Frequently asked questions
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
+
+          <p className="mx-auto mt-3 max-w-md text-foreground/70">
             Got questions about Clarus? We&apos;ve got answers.
           </p>
         </div>
 
-        <div className="border border-foreground/5 rounded-2xl bg-muted/20 backdrop-blur-xl py-2">
+        <div className="rounded-2xl bg-gray-100 py-1">
           {FAQS.map((faq, index) => (
             <FaqItem
               key={faq.q}

@@ -1,84 +1,57 @@
 import Link from "next/link";
-import Image from "next/image";
+
+const LINKS = [
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "Features", href: "/#features" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Log in", href: "/login" },
+];
 
 export function Footer() {
   return (
-    <footer className="relative flex flex-col justify-between h-screen min-h-125 overflow-hidden pt-12 pb-6 notched-card">
-      
-      {/* 1. Background Image Layer */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
-        <Image
-          src="/wallpaper.jpg"
-          alt=""
-          fill
-          loading="lazy"
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-      </div>
-
-      {/* 2. Giant Background Text Layer */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center translate-y-[20%] pointer-events-none select-none overflow-hidden">
-        <h1 className="text-[16vw] font-black tracking-tighter text-foreground dark:text-foreground/40 whitespace-nowrap">
-          Clarus
-        </h1>
-      </div>
-
-      {/* 3. The Spreading Blur / Gradient Fade Layer */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/2 z-20 pointer-events-none">
-        {/* This handles the color fading smoothly into the background */}
-        <div className="absolute inset-0 bg-linear-to-t from-background via-background/60 to-transparent" />
-
-        {/* This handles the blur fading smoothly without a harsh top edge */}
-        <div
-          className="absolute inset-0 backdrop-blur-md dark:backdrop-blur-2xl"
-          style={{
-            WebkitMaskImage: 'linear-gradient(to top, black 10%, transparent 90%)',
-            maskImage: 'linear-gradient(to top, black 10%, transparent 90%)'
-          }}
-        />
-      </div>
-
-      {/* 4. Foreground Content Layer */}
-      <div className="relative z-30 mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 lg:px-8 pt-0 sm:pt-8 lg:flex-row lg:items-start lg:justify-between flex-1">
+    <footer className="notched-card relative mx-2 mb-2 overflow-hidden bg-gray-100">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 pt-14 md:flex-row md:items-start md:justify-between md:px-10">
         <div className="max-w-xs">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold text-sm md:text-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground">
               C
-            </div>
-            <div>
-              <h3 className="font-bold text-sm md:text-lg tracking-tight">Clarus</h3>
-            </div>
+            </span>
+
+            <span className="font-semibold tracking-tight">Clarus</span>
           </div>
-          <p className="text-[10px] md:text-xs text-foreground leading-relaxed">
+
+          <p className="mt-3 text-sm leading-relaxed text-foreground/70">
             Turn financial documents into precise, structured answers.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-10 lg:gap-20">
-          <div>
-            <h4 className="font-semibold text-xs md:text-sm mb-4">Product</h4>
-            <div className="flex flex-col gap-3 text-xs text-foreground">
-              <Link href="/#features" className="hover:text-primary transition-colors">Features</Link>
-              <Link href="/#how-it-works" className="hover:text-primary transition-colors">How It Works</Link>
-              <Link href="/#faq" className="hover:text-primary transition-colors">FAQ</Link>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-semibold text-xs md:text-sm mb-4">Legal</h4>
-            <div className="flex flex-col gap-3 text-xs text-foreground">
-              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-              <Link href="mailto:support@clarus.com" className="hover:text-primary transition-colors">Contact Support</Link>
-            </div>
-          </div>
-        </div>
+        <nav aria-label="Footer navigation">
+          <ul className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-foreground/70">
+            {LINKS.map(({ label, href }) => (
+              <li key={label}>
+                <Link
+                  href={href}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
 
-      {/* Copyright Footer */}
-      <div className="relative z-30 mx-auto w-full max-w-7xl px-6 lg:px-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground mt-auto">
-        <p>&copy; {new Date().getFullYear()} Clarus. All rights reserved.</p>
+      <p className="mx-auto mt-10 w-full max-w-7xl px-6 text-xs text-muted-foreground md:px-10">
+        &copy; {new Date().getFullYear()} Clarus. All rights reserved.
+      </p>
+
+      {/* Decorative wordmark, cut off by the bottom edge */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none mt-4 -mb-[7vw] select-none whitespace-nowrap text-center text-[27vw] font-bold leading-[0.9] tracking-tighter text-foreground/[0.05]"
+      >
+        Clarus
       </div>
     </footer>
   );
-};
+}

@@ -17,9 +17,9 @@ type Feature = {
 
 const FEATURES: Feature[] = [
   {
-    title: "Structured, not conversational",
+    title: "Structured actions, or just ask",
     description:
-      "No prompt writing. Pick an action and get a consistent, predictable result every time.",
+      "Pick an action for a consistent result, or chat with your documents in plain language.",
     span: "lg:col-span-2",
     delay: 0,
     panel: <ActionsPanel />,

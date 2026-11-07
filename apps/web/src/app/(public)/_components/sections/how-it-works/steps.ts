@@ -3,7 +3,7 @@ export const STEPS = [
     number: "01",
     title: "Upload your document",
     description:
-      "Drop a contract, invoice, or financial report. Clarus reads it in seconds.",
+      "Drop a contract, invoice, or financial report. Clarus reads every page for you.",
   },
   {
     number: "02",
@@ -36,7 +36,7 @@ export const EXTRACTED_VALUES = [
   {
     clause: "3.2 Payment due on or before",
     field: "Due date",
-    value: "Oct 15, 2026",
+    value: "Oct 15, 2027",
   },
   {
     clause: "3.3 Late fee on overdue sums",

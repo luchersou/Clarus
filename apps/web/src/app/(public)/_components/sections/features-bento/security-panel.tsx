@@ -9,7 +9,7 @@ const GUARANTEE_INTERVAL = 180;
 
 const CONTRACT_TERMS = [
   { label: "Total amount", value: "$48,750.00" },
-  { label: "Due date", value: "Oct 15, 2026" },
+  { label: "Due date", value: "Oct 15, 2027" },
   { label: "Late fee", value: "2% per month" },
   { label: "Supplier", value: "Acme Supply Co." },
   { label: "Term", value: "12 months" },
