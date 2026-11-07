@@ -1,55 +1,74 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { loginWithPassword } from "@/app/(auth)/login/actions";
+import { useActionState } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { loginWithPassword, type LoginState } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <div className="rounded-lg bg-primary p-0.5">
-      <Button
-        type="submit"
-        disabled={pending}
-        className="h-9 w-full rounded-lg bg-primary/60 text-primary-foreground transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.4)]"
-      >
-        {pending ? "Signing in..." : "Sign in"}
-      </Button>
-    </div>
-  );
-}
+const INITIAL_STATE: LoginState = { error: null, email: "" };
 
 export function LoginForm() {
+  const [state, formAction, pending] = useActionState(
+    loginWithPassword,
+    INITIAL_STATE,
+  );
+
+  const invalid = Boolean(state.error);
+
   return (
-    <form action={loginWithPassword} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">Email</label>
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
           name="email"
-          placeholder="you@example.com"
+          placeholder="you@company.com"
           autoComplete="email"
+          defaultValue={state.email}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? "login-error" : undefined}
           required
-          className="h-10 rounded-lg border-2 border-foreground/5"
+          className="h-10"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">Password</label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
           name="password"
           placeholder="••••••••"
           autoComplete="current-password"
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? "login-error" : undefined}
           required
-          className="h-10 rounded-lg border-2 border-foreground/5"
+          className="h-10"
         />
       </div>
 
-      <SubmitButton />
+      {state.error && (
+        <p
+          id="login-error"
+          role="alert"
+          className="flex items-start gap-2 text-sm text-destructive"
+        >
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          {state.error}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        disabled={pending}
+        className="h-10 w-full gap-2"
+      >
+        {pending && <Loader2 className="size-4 animate-spin" />}
+        {pending ? "Signing in…" : "Sign in with email"}
+      </Button>
     </form>
   );
 }
