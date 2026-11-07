@@ -4,13 +4,20 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function loginWithPassword(formData: FormData) {
+export type LoginState = {
+  error: string | null;
+  email: string;
+};
+
+export async function loginWithPassword(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
   const email = formData.get("email");
   const password = formData.get("password");
 
   if (typeof email !== "string" || typeof password !== "string") {
-    redirect("/login?error=invalid_credentials");
-    return;
+    return { error: "Enter your email and password.", email: "" };
   }
 
   const supabase = await createClient();
@@ -21,8 +28,10 @@ export async function loginWithPassword(formData: FormData) {
   });
 
   if (error) {
-    redirect("/login?error=invalid_credentials");
-    return;
+    return {
+      error: "That email and password don't match. Try again or use GitHub or Google.",
+      email,
+    };
   }
 
   redirect("/dashboard");
