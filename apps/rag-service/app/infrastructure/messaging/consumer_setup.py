@@ -7,12 +7,17 @@ from app.infrastructure.messaging.consumers.document_uploaded_consumer import (
 from app.infrastructure.messaging.consumers.analysis_document_validated_consumer import (
     handle_analysis_document_validated,
 )
+from app.infrastructure.messaging.consumers.document_deleted_consumer import (
+    handle_document_deleted,
+)
 
 QUEUE_DOCUMENT_UPLOADED = "rag.document-uploaded"
 QUEUE_ANALYSIS_DOCUMENT_VALIDATED = "rag.analysis-document-validated"
+QUEUE_DOCUMENT_DELETED = "rag.document-deleted"
 
 ROUTING_KEY_DOCUMENT_UPLOADED = "document.uploaded"
 ROUTING_KEY_ANALYSIS_DOCUMENT_VALIDATED = "analysis.document_validated"
+ROUTING_KEY_DOCUMENT_DELETED = "document.deleted"
 
 
 async def setup_consumers() -> None:
@@ -35,3 +40,8 @@ async def setup_consumers() -> None:
         exchange, routing_key=ROUTING_KEY_ANALYSIS_DOCUMENT_VALIDATED
     )
     await analysis_validated_queue.consume(handle_analysis_document_validated)
+
+    # a deleted document must stop showing up in chat answers
+    document_deleted_queue = await channel.declare_queue(QUEUE_DOCUMENT_DELETED, durable=True)
+    await document_deleted_queue.bind(exchange, routing_key=ROUTING_KEY_DOCUMENT_DELETED)
+    await document_deleted_queue.consume(handle_document_deleted)

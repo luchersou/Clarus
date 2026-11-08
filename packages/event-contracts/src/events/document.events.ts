@@ -27,7 +27,7 @@ export const DocumentEmbeddingFailedSchema = z.object({
 export type DocumentEmbeddingFailedEvent = z.infer<typeof DocumentEmbeddingFailedSchema>;
 
 // Published by: documents-service, when a document is deleted
-// Consumed by: analysis-service
+// Consumed by: analysis-service (deletes its analyses), rag-service (deletes its chunks)
 export const DocumentDeletedSchema = z.object({
   documentId: z.string().uuid(),
   userId: z.string().uuid(),

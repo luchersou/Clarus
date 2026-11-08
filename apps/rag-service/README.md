@@ -33,14 +33,15 @@ Chat is HTTP, not RPC: a streamed answer doesn't fit the request/response shape 
 | Consumes | `analysis.document_validated` | `documents-service` confirmed the document can be analyzed |
 | Publishes | `analysis.completed` | The LLM produced a result |
 | Publishes | `analysis.failed` | Retrieval or the LLM call failed |
+| Consumes | `document.deleted` | The user deleted a document; its chunks are removed |
 
-Events go through the `clarus.events` exchange; this service consumes from the `rag.document-uploaded` and `rag.analysis-document-validated` queues.
+Events go through the `clarus.events` exchange; this service consumes from the `rag.document-uploaded`, `rag.analysis-document-validated`, and `rag.document-deleted` queues.
 
 The use cases catch their own exceptions and publish a `*_failed` event on error. Anything that fails before that (an unparsable payload, or the database being down) makes the consumer reject the message without requeueing it, so it's never redelivered in a loop.
 
 **Running an analysis at most once.** Events are delivered at least once, so the same `analysis.document_validated` can arrive twice. Before running an analysis, the consumer claims its id in the `processed_analyses` table (`INSERT ... ON CONFLICT DO NOTHING`); if the id was already there, the message is acknowledged and skipped, and the LLM isn't called again. The claim is committed before the analysis runs, so if the worker dies halfway, the redelivery is skipped too, and the analysis is failed (and its credit refunded) by `analysis-service`'s timeout.
 
-`rag-service` doesn't consume `document.deleted`: a deleted document's chunks and chat sessions stay in the `rag` schema.
+**Forgetting deleted documents.** On `document.deleted`, the consumer deletes that document's chunks (scoped to its owner), so it stops showing up in chat answers and analyses. The delete is idempotent, so a redelivery is harmless. Chat history is kept: past answers stay readable, but nothing new is retrieved from the document.
 
 ## Architecture
 
@@ -66,13 +67,14 @@ apps/rag-service/
 │   │   │   └── retrieve_relevant_chunks.py   # Embeds the query, finds similar chunks via pgvector
 │   │   ├── process_document.py               # Use case: download, extract, chunk, embed, publish
 │   │   ├── run_analysis.py                   # Use case: retrieve + prompt + Groq, publish result
-│   │   └── chat_with_documents.py            # Use case: retrieve + prompt + Groq, streamed
+│   │   ├── chat_with_documents.py            # Use case: retrieve + prompt + Groq, streamed
+│   │   └── delete_document_chunks.py         # Use case: drop a deleted document's chunks
 │   │
 │   ├── infrastructure/
 │   │   ├── persistence/
 │   │   │   ├── database.py                       # Async engine and session factory
 │   │   │   ├── models.py                         # SQLAlchemy models: DocumentChunk, ChatSession, ChatMessage, ProcessedAnalysis
-│   │   │   ├── document_chunk_repository.py      # Similarity search over embeddings
+│   │   │   ├── document_chunk_repository.py      # Saves, searches (pgvector), and deletes chunks
 │   │   │   ├── chat_session_repository.py        # Create/find chat sessions
 │   │   │   ├── chat_message_repository.py        # Save/list messages in a session
 │   │   │   └── processed_analysis_repository.py  # Claims an analysis id so a redelivery isn't run twice
@@ -80,11 +82,12 @@ apps/rag-service/
 │   │   │   └── extractor.py              # PDF (with tables), DOCX, and XLSX text extraction + chunking
 │   │   ├── messaging/
 │   │   │   ├── connection.py             # aio-pika connection/channel/exchange, cached as singletons
-│   │   │   ├── consumer_setup.py         # Declares queues, binds them, registers the two consumers
+│   │   │   ├── consumer_setup.py         # Declares queues, binds them, registers the three consumers
 │   │   │   ├── publisher.py              # Publishes the 4 outgoing events (2 validated, 2 plain dict)
 │   │   │   └── consumers/
 │   │   │       ├── document_uploaded_consumer.py    # Handles document.uploaded
-│   │   │       └── analysis_document_validated_consumer.py   # Handles analysis.document_validated, once per analysis
+│   │   │       ├── analysis_document_validated_consumer.py   # Handles analysis.document_validated, once per analysis
+│   │   │       └── document_deleted_consumer.py     # Handles document.deleted
 │   │   ├── storage/
 │   │   │   └── supabase_storage_client.py    # Downloads the uploaded file from Supabase Storage
 │   │   └── llm/
@@ -93,6 +96,7 @@ apps/rag-service/
 │   │
 │   ├── schemas/                          # Pydantic models generated from the shared JSON Schema contracts
 │   │   ├── document_uploaded.py
+│   │   ├── document_deleted.py
 │   │   ├── document_embedded.py
 │   │   ├── analysis_document_validated.py
 │   │   └── analysis_completed.py

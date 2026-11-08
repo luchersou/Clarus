@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.persistence.models import DocumentChunk
@@ -19,6 +19,17 @@ class DocumentChunkRepository:
             select(DocumentChunk).where(DocumentChunk.document_id == document_id)
         )
         return list(result.scalars().all())
+
+    async def delete_by_document_id(self, document_id: UUID, user_id: UUID) -> int:
+        # Scoped to the owner too, so a forged event can't wipe another user's chunks.
+        result = await self.session.execute(
+            delete(DocumentChunk).where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.user_id == user_id,
+            )
+        )
+        await self.session.commit()
+        return result.rowcount or 0
 
     async def find_similar(
         self, embedding: list[float], user_id: UUID, document_id: UUID | None, limit: int = 5
