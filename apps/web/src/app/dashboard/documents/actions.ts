@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { authHeaders } from "@/lib/api/auth-headers";
-import { getDocumentById } from "@/lib/api/documents";
+import { getDocumentById, getDocuments } from "@/lib/api/documents";
 
 const API_URL = process.env.API_GATEWAY_URL!;
 
@@ -36,4 +36,8 @@ export async function deleteDocument(id: string) {
 
 export async function getDocumentByIdAction(id: string) {
   return getDocumentById(id);
+}
+
+export async function getDocumentsAction() {
+  return getDocuments();
 }
