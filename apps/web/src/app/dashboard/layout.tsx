@@ -1,9 +1,12 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppSidebar } from "@/app/dashboard/_components/sidebar/app-sidebar";
 import { SiteHeader } from "@/app/dashboard/_components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DashboardThemeProvider } from "@/app/dashboard/_components/theme/dashboard-theme-provider";
+import { DASHBOARD_THEME_COOKIE, parseDashboardTheme } from "@/app/dashboard/_lib/theme";
 
 export default async function DashboardLayout({
   children,
@@ -21,8 +24,11 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  const cookieStore = await cookies();
+  const theme = parseDashboardTheme(cookieStore.get(DASHBOARD_THEME_COOKIE)?.value);
+
   return (
-    <div style={{ fontFamily: "var(--font-geist)" }}>
+    <DashboardThemeProvider initialTheme={theme} style={{ fontFamily: "var(--font-geist)" }}>
       <TooltipProvider>
         <SidebarProvider
           style={{
@@ -39,6 +45,6 @@ export default async function DashboardLayout({
           </SidebarInset>
         </SidebarProvider>
       </TooltipProvider>
-    </div>
+    </DashboardThemeProvider>
   );
 }
