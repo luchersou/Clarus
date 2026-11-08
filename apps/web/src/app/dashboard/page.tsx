@@ -29,7 +29,9 @@ export default function DashboardPage() {
           <Suspense fallback={<RecentDocumentsCardSkeleton />}>
             <RecentDocumentsCard />
           </Suspense>
-          <DashboardGettingStarted />
+          <Suspense fallback={null}>
+            <DashboardGettingStarted />
+          </Suspense>
         </aside>
       </div>
     </div>
