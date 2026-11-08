@@ -95,6 +95,8 @@ sequenceDiagram
 
 ## Design decisions
 
+**Distributed on purpose.** Clarus is split into services to practice what that requires: a choreographed saga with compensation, a transactional outbox, at-least-once delivery, and contracts shared across two languages. At its current size, a real product wouldn't need this. I'd build one API (documents, analyses, quota, chat retrieval) on a single database, plus a worker behind a queue for the slow, costly AI work (text extraction, embeddings, analyses). The saga would become a transaction and the gateway would disappear. I'd only split further if there were separate teams, very different scaling needs, or isolation requirements.
+
 **Choreographed saga instead of orchestration.** The flows (upload to embedding, analysis request to result) are short and linear, so each service just publishes an event when its step finishes and the next one reacts. There is no central coordinator to build and keep in sync with every service, and no extra hop between steps, which keeps latency low. The trade-off is that the full flow isn't defined in one place; with few services and events, all named in a single shared package, that cost stays small.
 
 **The analysis saga has real compensation.** Each analysis reserves one credit of the user's daily quota. `documents-service` checks the document before anything runs; if it rejects the request, if `rag-service` fails, or if no reply arrives before the timeout, `analysis-service` fails the analysis and refunds the credit. A completed analysis consumes it.
