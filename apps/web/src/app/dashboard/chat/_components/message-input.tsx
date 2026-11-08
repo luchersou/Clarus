@@ -22,18 +22,14 @@ export function MessageInput({ onSend, onStop, isStreaming }: MessageInputProps)
     onSend(trimmed);
     setValue("");
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.focus();
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleSend();
-    }
-  };
-
+  // Fallback for browsers without field-sizing: grow with the content
   const handleInput = () => {
     const el = textareaRef.current;
     if (!el) return;
@@ -41,41 +37,58 @@ export function MessageInput({ onSend, onStop, isStreaming }: MessageInputProps)
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   };
 
-  return (
-    <div className="border-t border-border bg-background px-4 py-3">
-      <div className="flex items-end gap-2 rounded-2xl border border-border bg-card px-3 py-2">
-        <Textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onInput={handleInput}
-          placeholder="Ask about a document..."
-          rows={1}
-          className="max-h-40 flex-1 resize-none border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
-        />
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
 
-        {isStreaming ? (
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            className="shrink-0 rounded-full"
-            onClick={onStop}
-          >
-            <Square className="size-3.5 fill-current" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            size="icon"
-            className="shrink-0 rounded-full"
-            disabled={!value.trim()}
-            onClick={handleSend}
-          >
-            <ArrowUp className="size-4" />
-          </Button>
-        )}
+  return (
+    <div className="relative px-4 pt-2 pb-4 md:px-6">
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="flex items-end gap-2 rounded-2xl border border-border bg-card p-2 pl-4 shadow-sm transition-[border-color,box-shadow] focus-within:border-primary/40 focus-within:shadow-md focus-within:ring-3 focus-within:ring-primary/10">
+          <Textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onInput={handleInput}
+            placeholder="Ask about a contract, invoice or report…"
+            aria-label="Message"
+            rows={1}
+            className="min-h-0 max-h-40 flex-1 resize-none border-0 bg-transparent px-0 py-1.5 shadow-none focus-visible:ring-0 dark:bg-transparent"
+          />
+
+          {isStreaming ? (
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              aria-label="Stop generating"
+              className="size-9 shrink-0 rounded-xl"
+              onClick={onStop}
+            >
+              <Square className="size-3.5 fill-current" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="icon"
+              aria-label="Send message"
+              className="size-9 shrink-0 rounded-xl"
+              disabled={!value.trim()}
+              onClick={handleSend}
+            >
+              <ArrowUp className="size-4" />
+            </Button>
+          )}
+        </div>
+
+        <p className="mt-2 hidden text-center text-[11px] text-muted-foreground sm:block">
+          <kbd className="font-sans font-medium">Enter</kbd> to send ·{" "}
+          <kbd className="font-sans font-medium">Shift + Enter</kbd> for a new line
+        </p>
       </div>
     </div>
   );
