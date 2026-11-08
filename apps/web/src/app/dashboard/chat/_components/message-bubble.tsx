@@ -50,7 +50,7 @@ export function MessageBubble({
           </div>
         ) : (
           <>
-            <div className="prose prose-sm max-w-none text-foreground dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-ul:my-2 prose-li:my-0.5 prose-table:my-3 prose-th:text-left first:prose-p:mt-0.5">
+            <div className="prose prose-sm prose-theme max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-ul:my-2 prose-li:my-0.5 prose-table:my-3 prose-th:text-left first:prose-p:mt-0.5">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
             </div>
 
