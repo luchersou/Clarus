@@ -33,13 +33,15 @@ class DocumentChunkRepository:
 
     async def find_similar(
         self, embedding: list[float], user_id: UUID, document_id: UUID | None, limit: int = 5
-    ) -> list[DocumentChunk]:
-        query = select(DocumentChunk).where(DocumentChunk.user_id == user_id)
+    ) -> list[tuple[DocumentChunk, float]]:
+        """Closest chunks first, each with its cosine similarity (1 = identical direction)."""
+        distance = DocumentChunk.embedding.cosine_distance(embedding).label("distance")
+        query = select(DocumentChunk, distance).where(DocumentChunk.user_id == user_id)
 
         if document_id:
             query = query.where(DocumentChunk.document_id == document_id)
 
-        query = query.order_by(DocumentChunk.embedding.cosine_distance(embedding)).limit(limit)
+        query = query.order_by(distance).limit(limit)
 
         result = await self.session.execute(query)
-        return list(result.scalars().all())
+        return [(chunk, 1 - float(chunk_distance)) for chunk, chunk_distance in result.all()]

@@ -19,7 +19,7 @@ Owns document processing and retrieval-augmented generation. It's the second par
 | GET | `/chat/sessions/{id}/messages` | List the messages in a session |
 | GET | `/health` | Health check, used by Render |
 
-These routes don't authenticate: they trust the `user_id` sent by the `api-gateway` (in the `/chat` body, as a query parameter on the GET routes), which takes it from the validated token. The service is meant to be reachable only by the gateway. A chat stream emits a `session` event (the session id), then `message` events with the answer, then `done`.
+These routes don't authenticate: they trust the `user_id` sent by the `api-gateway` (in the `/chat` body, as a query parameter on the GET routes), which takes it from the validated token. The service is meant to be reachable only by the gateway. A chat stream emits a `session` event (the session id), then `message` events with the answer, then a `sources` event, then `done`. `sources` is a JSON array with one entry per document page the answer drew on, best match first: `{ documentId, page, confidence }`, where `confidence` is the cosine similarity of the closest chunk on that page. The same array is saved on the assistant message and returned by `/chat/sessions/{id}/messages`. File names aren't stored here, so the web app resolves `documentId` to a name.
 
 Chat is HTTP, not RPC: a streamed answer doesn't fit the request/response shape RabbitMQ RPC is built for, and the `api-gateway` proxies these routes directly instead of going through the broker.
 

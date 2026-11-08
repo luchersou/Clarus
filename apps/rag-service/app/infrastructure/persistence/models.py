@@ -57,7 +57,8 @@ class ChatMessage(Base):
     )
     role: Mapped[Literal["user", "assistant"]] = mapped_column(String(20), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    sources: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # [{"documentId", "page", "confidence"}] for assistant messages, best match first
+    sources: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -69,7 +70,7 @@ class ChatMessage(Base):
         session_id: uuid.UUID,
         role: Literal["user", "assistant"],
         content: str,
-        sources: dict | None = None,
+        sources: list[dict] | None = None,
     ) -> "ChatMessage":
         return ChatMessage(
             id=uuid.uuid4(),

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ChatMessage } from "../_lib/types";
+import type { DisplayMessage } from "../_lib/types";
 import { MessageBubble } from "./message-bubble";
 import { StreamingIndicator } from "./streaming-indicator";
 import { EmptyState } from "./empty-state";
 
 interface MessageListProps {
-  messages: ChatMessage[];
+  messages: DisplayMessage[];
   isStreaming: boolean;
   error: string | null;
   onSuggestion: (question: string) => void;
