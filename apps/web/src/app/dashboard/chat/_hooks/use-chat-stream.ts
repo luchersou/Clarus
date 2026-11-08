@@ -3,17 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { createParser, type EventSourceMessage } from "eventsource-parser";
 
-interface Source {
-  documentName: string;
-  page: number;
-  confidence: number;
-}
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  sources?: Source[];
-}
+import type { ChatMessage, Source } from "../_lib/types";
 
 export function useChatStream() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -59,7 +49,7 @@ export function useChatStream() {
             return updated;
           });
         } catch {
-          // payload malformado — ignora, não derruba a resposta
+          // Malformed payload: skip the sources, keep the answer
         }
       } else if (event.event === "error") {
         throw new Error(event.data || "The assistant ran into an error.");
@@ -116,10 +106,19 @@ export function useChatStream() {
     abortControllerRef.current?.abort();
   }, []);
 
+  // Drops the history and the server session so the next question starts fresh
+  const resetChat = useCallback(() => {
+    abortControllerRef.current?.abort();
+    sessionIdRef.current = undefined;
+    setMessages([]);
+    setError(null);
+  }, []);
+
   return {
     messages,
     sendMessage,
     stopStreaming,
+    resetChat,
     isStreaming,
     error,
   };
