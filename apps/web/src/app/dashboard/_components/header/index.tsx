@@ -3,6 +3,7 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import Search from "@/app/dashboard/_components/header/search";
+import { ThemeToggle } from "@/app/dashboard/_components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -18,6 +19,9 @@ export function SiteHeader() {
         </Button>
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
         <Search />
+        <div className="ml-auto flex items-center">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
