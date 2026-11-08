@@ -39,7 +39,7 @@ export function MessageList({
     isStreaming && last?.role === "assistant" && last.content === "";
 
   return (
-    <div className="relative flex-1 overflow-y-auto">
+    <div className="relative min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 md:px-6">
         {messages.map((message, index) => {
           const isLast = index === lastIndex;

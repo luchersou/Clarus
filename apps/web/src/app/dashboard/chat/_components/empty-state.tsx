@@ -14,11 +14,13 @@ interface EmptyStateProps {
 
 export function EmptyState({ onSuggestion }: EmptyStateProps) {
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-10">
-      <div className="w-full max-w-2xl text-center">
+    // m-auto instead of justify-center: centered when it fits, and when it
+    // doesn't, it overflows downwards and scrolls instead of clipping the top
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 md:py-8">
+      <div className="m-auto w-full max-w-2xl text-center">
         <AssistantAvatar className="mx-auto size-11 rounded-lg text-lg ring-4" />
 
-        <h2 className="mt-5 text-balance text-2xl font-semibold tracking-tight md:text-3xl">
+        <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight md:text-3xl">
           Ask anything about your documents
         </h2>
         <p className="mx-auto mt-2 max-w-md text-pretty text-sm text-muted-foreground">
@@ -26,7 +28,7 @@ export function EmptyState({ onSuggestion }: EmptyStateProps) {
           inside it and show you where it came from.
         </p>
 
-        <ul className="mt-8 grid gap-2 text-left sm:grid-cols-2">
+        <ul className="mt-6 grid gap-2 text-left sm:grid-cols-2">
           {SUGGESTIONS.map(({ icon: Icon, text }) => (
             <li key={text}>
               <button
