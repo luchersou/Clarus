@@ -1,185 +1,222 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, CheckCircle2, FileUp, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileUp, Loader2, RotateCw, XIcon } from "lucide-react";
 
 import { uploadDocument } from "../actions";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { formatBytes } from "../_lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
+const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".xlsx"];
 const ACCEPTED_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
-const formatBytes = (bytes: number) => {
-  if (bytes < 1024 * 1024) {
-    return `${Math.round(bytes / 1024)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
+type UploadState = "uploading" | "done" | "error";
 
-const isAcceptedFile = (file: File) => {
-  const acceptedExtensions = [".pdf", ".docx", ".xlsx"];
-  return (
+interface UploadItem {
+  id: string;
+  file: File;
+  state: UploadState;
+  error?: string;
+}
+
+function validate(file: File): string | null {
+  const hasAcceptedType =
     ACCEPTED_TYPES.includes(file.type) ||
-    acceptedExtensions.some((ext) => file.name.toLowerCase().endsWith(ext))
-  );
-};
+    ACCEPTED_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext));
+  if (!hasAcceptedType) return "Only PDF, Word, or Excel files are supported.";
+  if (file.size > MAX_FILE_SIZE) return "File must be 15 MB or smaller.";
+  return null;
+}
 
 export function DocumentUploadPanel() {
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [items, setItems] = useState<UploadItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const selectFile = (nextFile?: File) => {
-    setError(null);
-    setSuccess(null);
-
-    if (!nextFile) return;
-
-    if (!isAcceptedFile(nextFile)) {
-      setFile(null);
-      setError("Upload a PDF, Word, or Excel file.");
-      return;
-    }
-
-    if (nextFile.size > MAX_FILE_SIZE) {
-      setFile(null);
-      setError("File must be 15 MB or smaller.");
-      return;
-    }
-
-    setFile(nextFile);
+  const updateItem = (id: string, patch: Partial<UploadItem>) => {
+    setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
-  const handleUpload = () => {
-    setError(null);
-    setSuccess(null);
+  const removeItem = (id: string) => {
+    setItems((current) => current.filter((item) => item.id !== id));
+  };
 
-    if (!file) {
-      setError("Choose a file first.");
-      return;
+  const upload = async (item: UploadItem) => {
+    updateItem(item.id, { state: "uploading", error: undefined });
+    try {
+      const formData = new FormData();
+      formData.append("file", item.file);
+      await uploadDocument(formData);
+      updateItem(item.id, { state: "done" });
+      router.refresh();
+    } catch {
+      updateItem(item.id, { state: "error", error: "Upload failed. Please try again." });
     }
+  };
 
-    startTransition(async () => {
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
+  const addFiles = async (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
 
-        await uploadDocument(formData);
-
-        setSuccess(`${file.name} uploaded successfully.`);
-        setFile(null);
-        router.refresh();
-      } catch {
-        setError("Unable to upload document. Please try again.");
-      }
+    const newItems: UploadItem[] = Array.from(fileList).map((file) => {
+      const error = validate(file);
+      return {
+        id: crypto.randomUUID(),
+        file,
+        state: error ? "error" : "uploading",
+        error: error ?? undefined,
+      };
     });
+
+    // Finished uploads from a previous batch are no longer interesting.
+    setItems((current) => [...newItems, ...current.filter((item) => item.state !== "done")]);
+
+    // One at a time keeps the order predictable and avoids hammering the API.
+    for (const item of newItems) {
+      if (item.state === "uploading") await upload(item);
+    }
   };
+
+  const isUploading = items.some((item) => item.state === "uploading");
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-sm border border-foreground/5 bg-card/20 shadow-sm">
-      <div className="flex items-start justify-between gap-3 border-b border-foreground/5 bg-muted/10 px-3 py-3 md:px-5 md:py-4">
-        <div>
-          <h2 className="text-sm font-semibold tracking-tight text-foreground">
-            Upload Document
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Add a PDF, Word, or Excel file to start analyzing it.
+    <section aria-label="Upload documents" className="space-y-2">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-describedby="upload-hint"
+        className={cn(
+          "flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed bg-card px-4 py-6 text-center outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:text-left",
+          isDragging
+            ? "border-primary bg-primary/5"
+            : "border-foreground/15 hover:border-primary/40 hover:bg-muted/40",
+        )}
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(event) => {
+          // Ignore leave events fired when moving over child elements.
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setIsDragging(false);
+          }
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+          void addFiles(event.dataTransfer.files);
+        }}
+      >
+        <span
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors",
+            isDragging && "border-primary text-primary",
+          )}
+        >
+          {isUploading ? <Loader2 className="size-5 animate-spin" /> : <FileUp className="size-5" />}
+        </span>
+        <div className="flex-1 space-y-0.5">
+          <p className="text-sm font-medium">
+            {isDragging ? "Drop to upload" : "Drop files here or click to browse"}
+          </p>
+          <p id="upload-hint" className="text-xs text-muted-foreground">
+            PDF, Word, or Excel, up to 15 MB each. You can pick several at once.
           </p>
         </div>
-      </div>
-
-      <div className="flex flex-col gap-6 p-3 sm:p-6">
-        {error ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Upload failed</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <button
-          type="button"
-          className={cn(
-            "relative flex min-h-44 w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-foreground/10 bg-muted/10! px-4 py-8 text-center transition-all duration-300 ease-in-out",
-            isDragging
-              ? "scale-[1.01] border-primary bg-primary/5! shadow-sm"
-              : "hover:border-primary/40 hover:bg-muted/40!",
-            isPending && "pointer-events-none border-primary/30 bg-primary/5!",
-          )}
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(event) => {
-            event.preventDefault();
-            setIsDragging(false);
-            selectFile(event.dataTransfer.files[0]);
-          }}
-          disabled={isPending}
-        >
-          <div className="z-10 flex h-10 w-10 items-center justify-center rounded-sm border border-foreground/5 bg-card shadow-xs">
-            <FileUp
-              className={cn(
-                "h-5 w-5 text-muted-foreground transition-colors",
-                isDragging && "text-primary",
-              )}
-            />
-          </div>
-          <div className="z-10 space-y-1">
-            <p className="text-xs font-medium">
-              {file ? file.name : "Choose a file or drag it here"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {file ? formatBytes(file.size) : "PDF, Word, or Excel, up to 15 MB"}
-            </p>
-          </div>
-        </button>
-
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,.docx,.xlsx"
-          className="hidden"
-          onChange={(event) => selectFile(event.target.files?.[0])}
-        />
-
         <Button
           type="button"
-          className={cn(
-            "mt-2 h-9 w-full text-xs font-semibold tracking-tight md:text-sm",
-            success && "bg-emerald-500 text-white hover:bg-emerald-600",
-          )}
-          onClick={handleUpload}
-          disabled={isPending || (!file && !success)}
+          size="sm"
+          className="pointer-events-none hidden sm:inline-flex"
+          tabIndex={-1}
+          aria-hidden="true"
         >
-          {success ? (
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              {success}
-            </div>
-          ) : isPending ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Uploading
-            </>
-          ) : (
-            "Upload document"
-          )}
+          Choose files
         </Button>
       </div>
-    </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept=".pdf,.docx,.xlsx"
+        className="hidden"
+        onChange={(event) => {
+          void addFiles(event.target.files);
+          // Allow picking the same file again after a failure.
+          event.target.value = "";
+        }}
+      />
+
+      {items.length > 0 ? (
+        <ul className="divide-y rounded-xl border bg-card" aria-live="polite">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-center gap-3 px-4 py-2.5">
+              <span className="shrink-0">
+                {item.state === "uploading" ? (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                ) : item.state === "done" ? (
+                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                ) : (
+                  <AlertCircle className="size-4 text-destructive" />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium" title={item.file.name}>
+                  {item.file.name}
+                </p>
+                <p
+                  className={cn(
+                    "text-xs",
+                    item.state === "error" ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  {item.state === "uploading"
+                    ? `Uploading · ${formatBytes(item.file.size)}`
+                    : item.state === "done"
+                      ? "Uploaded, processing now"
+                      : item.error}
+                </p>
+              </div>
+              {item.state === "error" && !validate(item.file) ? (
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={`Retry ${item.file.name}`}
+                  onClick={() => void upload(item)}
+                >
+                  <RotateCw />
+                </Button>
+              ) : null}
+              {item.state !== "uploading" ? (
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={`Dismiss ${item.file.name}`}
+                  onClick={() => removeItem(item.id)}
+                >
+                  <XIcon />
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }

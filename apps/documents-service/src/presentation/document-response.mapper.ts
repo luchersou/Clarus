@@ -7,6 +7,7 @@ export class DocumentResponseMapper {
       userId: document.userId,
       fileName: document.fileName,
       fileType: document.fileType,
+      fileSizeBytes: document.fileSizeBytes,
       status: document.status,
       failureReason: document.failureReason,
       createdAt: document.createdAt,

@@ -3,5 +3,5 @@ import { DocumentsListClient } from "./documents-list-client";
 
 export async function DocumentsList() {
   const documents = await getDocuments();
-  return <DocumentsListClient documents={documents} />;
+  return <DocumentsListClient initialDocuments={documents} />;
 }
