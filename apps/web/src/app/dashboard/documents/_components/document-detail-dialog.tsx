@@ -4,10 +4,11 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
-  BarChart3,
-  Calendar,
+  CalendarClock,
+  ExternalLink,
   FileSearch,
-  FileText,
+  GitCompare,
+  ListChecks,
   Loader2,
 } from "lucide-react";
 
@@ -22,6 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatDate } from "@/lib/utils";
+import { FILE_TYPE_LABEL, formatBytes } from "../_lib/types";
 import { DocumentStatusBadge } from "./document-status-badge";
 
 interface DocumentDetail {
@@ -29,6 +32,9 @@ interface DocumentDetail {
   fileName: string;
   fileType: "PDF" | "DOCX" | "XLSX";
   status: "UPLOADED" | "PROCESSED" | "FAILED";
+  fileSizeBytes?: number;
+  failureReason: string | null;
+  createdAt: string;
   url: string;
 }
 
@@ -50,10 +56,10 @@ interface DocumentDetailDialogProps {
 }
 
 const ANALYSIS_TYPES = [
-  { type: "SUMMARY", label: "Summary", icon: FileText },
-  { type: "EXTRACT_VALUES", label: "Extract values", icon: FileSearch },
-  { type: "DEADLINES", label: "Deadlines", icon: Calendar },
-  { type: "COMPARE", label: "Comparison", icon: BarChart3 },
+  { type: "SUMMARY", label: "Summary", description: "Key points in a few paragraphs", icon: FileSearch },
+  { type: "EXTRACT_VALUES", label: "Extract values", description: "Amounts, names and figures", icon: ListChecks },
+  { type: "DEADLINES", label: "Deadlines", description: "Dates and due obligations", icon: CalendarClock },
+  { type: "COMPARE", label: "Comparison", description: "Contrast sections or versions", icon: GitCompare },
 ] as const;
 
 export function DocumentDetailDialog({
@@ -131,7 +137,7 @@ export function DocumentDetailDialog({
               <DialogTitle>Document details</DialogTitle>
             </DialogHeader>
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle />
               <AlertDescription>{loadError}</AlertDescription>
             </Alert>
           </>
@@ -142,57 +148,105 @@ export function DocumentDetailDialog({
         ) : (
           <>
             <DialogHeader>
-              <div className="flex items-center gap-2">
-                <DialogTitle className="truncate">{document.fileName}</DialogTitle>
+              <div className="flex min-w-0 items-center gap-2 pr-8">
+                <DialogTitle className="truncate" title={document.fileName}>
+                  {document.fileName}
+                </DialogTitle>
                 <DocumentStatusBadge status={document.status} />
               </div>
               <DialogDescription>
-                {document.fileType === "PDF"
-                  ? "Preview the document or run an analysis below."
-                  : "Open the file to preview it, or run an analysis below."}
+                {[
+                  FILE_TYPE_LABEL[document.fileType],
+                  typeof document.fileSizeBytes === "number"
+                    ? formatBytes(document.fileSizeBytes)
+                    : null,
+                  `Uploaded ${formatDate(document.createdAt)}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </DialogDescription>
             </DialogHeader>
+
+            {document.status === "FAILED" ? (
+              <Alert variant="destructive">
+                <AlertCircle />
+                <AlertDescription>
+                  {document.failureReason ??
+                    "We couldn't process this document. Try uploading it again."}
+                </AlertDescription>
+              </Alert>
+            ) : null}
 
             {document.fileType === "PDF" ? (
               <iframe
                 src={document.url}
-                className="h-96 w-full rounded-sm border"
+                className="h-96 w-full rounded-lg border bg-muted"
                 title={document.fileName}
               />
             ) : (
-              <a
-                href={document.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-primary underline underline-offset-4"
-              >
-                Open file in a new tab
-              </a>
+              <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-8 text-center">
+                <p className="text-sm font-medium">
+                  {FILE_TYPE_LABEL[document.fileType]} files can&apos;t be previewed here
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Open the original file in a new tab to view it.
+                </p>
+              </div>
             )}
+
+            <div className="flex justify-end">
+              <Button
+                nativeButton={false}
+                variant="outline"
+                size="sm"
+                render={<a href={document.url} target="_blank" rel="noopener noreferrer" />}
+              >
+                <ExternalLink />
+                Open in new tab
+              </Button>
+            </div>
 
             {error ? (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
 
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              {ANALYSIS_TYPES.map(({ type, label, icon: Icon }) => (
-                <Button
-                  key={type}
-                  variant="outline"
-                  disabled={document.status !== "PROCESSED" || isPending}
-                  onClick={() => handleRequestAnalysis(type)}
-                >
-                  {pendingType === type ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Icon className="mr-2 h-4 w-4" />
-                  )}
-                  {label}
-                </Button>
-              ))}
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-sm font-semibold">Run an analysis</h3>
+                {document.status !== "PROCESSED" ? (
+                  <p className="text-xs text-muted-foreground">
+                    Available once the document is ready
+                  </p>
+                ) : null}
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {ANALYSIS_TYPES.map(({ type, label, description, icon: Icon }) => (
+                  <Button
+                    key={type}
+                    variant="outline"
+                    className="h-auto justify-start gap-3 px-3 py-2.5 text-left whitespace-normal"
+                    disabled={document.status !== "PROCESSED" || isPending}
+                    onClick={() => handleRequestAnalysis(type)}
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      {pendingType === type ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <Icon />
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">{label}</span>
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {description}
+                      </span>
+                    </span>
+                  </Button>
+                ))}
+              </div>
             </div>
           </>
         )}
