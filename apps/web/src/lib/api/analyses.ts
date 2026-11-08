@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { authHeaders } from "@/lib/api/auth-headers";
 
 const API_URL = process.env.API_GATEWAY_URL!;
@@ -25,7 +26,7 @@ export interface AnalysisQuota {
 }
 
 // null when the quota can't be loaded, so the page still renders
-export async function getAnalysisQuota(): Promise<AnalysisQuota | null> {
+export const getAnalysisQuota = cache(async (): Promise<AnalysisQuota | null> => {
   const res = await fetch(`${API_URL}/analyses/quota`, {
     headers: await authHeaders(),
     cache: "no-store",
@@ -33,7 +34,7 @@ export async function getAnalysisQuota(): Promise<AnalysisQuota | null> {
 
   if (!res.ok) return null;
   return res.json();
-}
+});
 
 export async function getAnalysisById(id: string) {
   const res = await fetch(`${API_URL}/analyses/${id}`, {

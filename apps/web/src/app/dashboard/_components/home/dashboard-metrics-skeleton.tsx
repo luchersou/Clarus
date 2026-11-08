@@ -5,13 +5,14 @@ export function DashboardMetricsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-3" aria-hidden="true">
       {Array.from({ length: 3 }).map((_, index) => (
-        <Card key={index} className="h-full">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card key={index} className="h-full gap-3">
+          <CardHeader className="flex flex-row items-center justify-between">
             <Skeleton className="h-3 w-24" />
-            <Skeleton className="size-5 rounded-sm" />
+            <Skeleton className="size-8 rounded-lg" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <Skeleton className="h-9 w-16" />
+            <Skeleton className="h-3 w-32" />
           </CardContent>
         </Card>
       ))}
