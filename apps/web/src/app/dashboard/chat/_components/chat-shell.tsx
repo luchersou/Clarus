@@ -1,14 +1,33 @@
 "use client";
 
+import { useMemo } from "react";
 import { SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatStream } from "../_hooks/use-chat-stream";
+import type { DisplayMessage } from "../_lib/types";
 import { MessageList } from "./message-list";
 import { MessageInput } from "./message-input";
 
-export function ChatShell() {
+interface ChatShellProps {
+  // documentId -> file name, so source cards can show what the user called the file
+  documentNames: Record<string, string>;
+}
+
+export function ChatShell({ documentNames }: ChatShellProps) {
   const { messages, sendMessage, stopStreaming, resetChat, isStreaming, error } =
     useChatStream();
+
+  const displayedMessages = useMemo<DisplayMessage[]>(
+    () =>
+      messages.map((message) => ({
+        ...message,
+        sources: message.sources?.map((source) => ({
+          ...source,
+          documentName: documentNames[source.documentId] ?? "Document",
+        })),
+      })),
+    [messages, documentNames],
+  );
 
   const hasMessages = messages.length > 0;
 
@@ -42,7 +61,7 @@ export function ChatShell() {
       </header>
 
       <MessageList
-        messages={messages}
+        messages={displayedMessages}
         isStreaming={isStreaming}
         error={error}
         onSuggestion={sendMessage}

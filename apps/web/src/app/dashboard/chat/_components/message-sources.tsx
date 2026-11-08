@@ -21,7 +21,7 @@ export function MessageSources({ sources }: MessageSourcesProps) {
 
           return (
             <li
-              key={`${source.documentName}-${source.page}-${index}`}
+              key={`${source.documentId}-${source.page}-${index}`}
               className="flex max-w-full items-center gap-2 rounded-lg border border-border bg-card py-1.5 pr-2.5 pl-2 text-xs shadow-xs"
             >
               <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -29,7 +29,10 @@ export function MessageSources({ sources }: MessageSourcesProps) {
               </span>
 
               <span className="min-w-0">
-                <span className="block max-w-56 truncate font-medium text-foreground">
+                <span
+                  className="block max-w-56 truncate font-medium text-foreground"
+                  title={source.documentName}
+                >
                   {source.documentName}
                 </span>
                 <span className="text-[11px] text-muted-foreground">

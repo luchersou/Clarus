@@ -80,6 +80,7 @@ sequenceDiagram
     Note over DOC,ANA: Document deletion
     DOC->>MQ: document.deleted
     MQ->>ANA: delete the document's analyses
+    MQ->>RAG: delete the document's chunks
 ```
 
 ## Services

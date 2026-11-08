@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { createParser, type EventSourceMessage } from "eventsource-parser";
 
-import type { ChatMessage, Source } from "../_lib/types";
+import type { ChatMessage, RawSource } from "../_lib/types";
 
 export function useChatStream() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -39,7 +39,7 @@ export function useChatStream() {
         });
       } else if (event.event === "sources") {
         try {
-          const sources: Source[] = JSON.parse(event.data);
+          const sources: RawSource[] = JSON.parse(event.data);
           setMessages((prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = {
