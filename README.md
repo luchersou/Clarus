@@ -8,7 +8,7 @@ Clarus is a SaaS platform for financial document analysis. Users upload contract
 
 [clarus-delta.vercel.app](https://clarus-delta.vercel.app)
 
-[**Watch a walkthrough video**](https://www.youtube.com/watch?v=oe_7RHXJXkA)
+[**Watch a walkthrough video**](https://youtu.be/8sitk2yihEE)
 
 The backend services run on Render's free tier, which puts them to sleep after a period of inactivity. Before trying the demo, open each health check link below once — this wakes up the services, which can take 30-60 seconds. Without this, the first request may fail with an error page.
 
