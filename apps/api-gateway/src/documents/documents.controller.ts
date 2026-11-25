@@ -13,12 +13,15 @@ import { CurrentUser } from "../auth/current-user.decorator.js";
 import type { AuthenticatedUser } from "../auth/supabase-auth.guard.js";
 import { DocumentsService } from "./documents.service.js";
 
+// Same limit the web app enforces; Multer answers 413 above it.
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+
 @Controller("documents")
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } }))
   async upload(
     @UploadedFile() file: Express.Multer.File | undefined,
     @CurrentUser() user: AuthenticatedUser,
