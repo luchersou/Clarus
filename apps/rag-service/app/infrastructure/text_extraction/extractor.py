@@ -7,6 +7,22 @@ import pdfplumber
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 100
 
+# Caps on what one document may produce. Every chunk costs an embedding call, and a
+# small compressed file (PDF, DOCX, XLSX) can expand into far more text than its size suggests.
+MAX_PDF_PAGES = 300
+MAX_TEXT_CHARS = 500_000
+
+
+class DocumentTooLargeError(ValueError):
+    pass
+
+
+def _check_text_budget(used_chars: int) -> None:
+    if used_chars > MAX_TEXT_CHARS:
+        raise DocumentTooLargeError(
+            "The document has too much text to process. Split it into smaller files."
+        )
+
 
 def extract_text_and_chunk(file_bytes: bytes, file_type: str) -> list[tuple[str, int]]:
     if file_type == "PDF":
@@ -28,8 +44,14 @@ def extract_text_and_chunk(file_bytes: bytes, file_type: str) -> list[tuple[str,
 
 def _extract_pdf(file_bytes: bytes) -> list[tuple[int, str]]:
     pages: list[tuple[int, str]] = []
+    used_chars = 0
 
     with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+        if len(pdf.pages) > MAX_PDF_PAGES:
+            raise DocumentTooLargeError(
+                f"The PDF has more than {MAX_PDF_PAGES} pages. Split it into smaller files."
+            )
+
         for page_number, page in enumerate(pdf.pages, start=1):
             parts = []
 
@@ -44,7 +66,10 @@ def _extract_pdf(file_bytes: bytes) -> list[tuple[int, str]]:
                     if row_text.strip(" |"):
                         parts.append(row_text)
 
-            pages.append((page_number, "\n".join(parts)))
+            page_text = "\n".join(parts)
+            used_chars += len(page_text)
+            _check_text_budget(used_chars)
+            pages.append((page_number, page_text))
 
     return pages
 
@@ -61,20 +86,28 @@ def _extract_docx(file_bytes: bytes) -> list[tuple[int, str]]:
                 parts.append(row_text)
 
     full_text = "\n".join(parts)
+    _check_text_budget(len(full_text))
     return [(1, full_text)]
 
 
 def _extract_xlsx(file_bytes: bytes) -> list[tuple[int, str]]:
-    workbook = load_workbook(io.BytesIO(file_bytes), data_only=True)
+    # read_only streams the rows instead of loading the whole workbook into memory
+    workbook = load_workbook(io.BytesIO(file_bytes), data_only=True, read_only=True)
     pages: list[tuple[int, str]] = []
+    used_chars = 0
 
-    for sheet_index, sheet in enumerate(workbook.worksheets, start=1):
-        rows_text = []
-        for row in sheet.iter_rows(values_only=True):
-            row_text = " | ".join(str(cell) for cell in row if cell is not None)
-            if row_text:
-                rows_text.append(row_text)
-        pages.append((sheet_index, "\n".join(rows_text)))
+    try:
+        for sheet_index, sheet in enumerate(workbook.worksheets, start=1):
+            rows_text = []
+            for row in sheet.iter_rows(values_only=True):
+                row_text = " | ".join(str(cell) for cell in row if cell is not None)
+                if row_text:
+                    rows_text.append(row_text)
+                    used_chars += len(row_text)
+                    _check_text_budget(used_chars)
+            pages.append((sheet_index, "\n".join(rows_text)))
+    finally:
+        workbook.close()
 
     return pages
 
