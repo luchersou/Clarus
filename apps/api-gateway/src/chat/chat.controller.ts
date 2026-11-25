@@ -1,9 +1,10 @@
-import { Controller, Post, Get, Param, Body, Res } from "@nestjs/common";
+import { Controller, Post, Get, Param, Body, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { CurrentUser } from "../auth/current-user.decorator.js";
 import type { AuthenticatedUser } from "../auth/supabase-auth.guard.js";
 import { ChatService } from "./chat.service.js";
 import { ChatBodySchema } from "./dto/chat.dto.js";
+import { ChatRateLimitGuard } from "./chat-rate-limit.guard.js";
 
 
 @Controller("chat")
@@ -11,6 +12,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Post()
+  @UseGuards(ChatRateLimitGuard)
   async chat(
     @Body() body: unknown,
     @CurrentUser() user: AuthenticatedUser,

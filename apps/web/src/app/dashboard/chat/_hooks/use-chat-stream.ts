@@ -70,7 +70,10 @@ export function useChatStream() {
       });
 
       if (!res.ok || !res.body) {
-        throw new Error("Failed to start chat stream");
+        const body = (await res.json().catch(() => null)) as { error?: unknown } | null;
+        throw new Error(
+          typeof body?.error === "string" ? body.error : "Failed to start chat stream",
+        );
       }
 
       const reader = res.body.getReader();

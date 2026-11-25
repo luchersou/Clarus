@@ -13,6 +13,9 @@ import { UploadDocumentUseCase } from "../application/upload-document.use-case.j
 import { DocumentResponseMapper } from "./document-response.mapper.js";
 import { FILE_STORAGE, type FileStoragePort } from "../application/ports/file-storage.port.js";
 
+// Same limit the web app enforces; Multer answers 413 above it.
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+
 @Controller("documents")
 export class DocumentsController {
   constructor(
@@ -21,7 +24,7 @@ export class DocumentsController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } }))
   async upload(
     @UploadedFile() file: Express.Multer.File | undefined,
     @Body() body: unknown,

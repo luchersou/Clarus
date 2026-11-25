@@ -5,6 +5,9 @@ import { ArrowUp, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+// Mirrors the API limit on a question's length
+const MAX_QUESTION_LENGTH = 2000;
+
 interface MessageInputProps {
   onSend: (message: string) => void;
   onStop: () => void;
@@ -56,6 +59,7 @@ export function MessageInput({ onSend, onStop, isStreaming }: MessageInputProps)
             onInput={handleInput}
             placeholder="Ask about a contract, invoice or report…"
             aria-label="Message"
+            maxLength={MAX_QUESTION_LENGTH}
             rows={1}
             className="min-h-0 max-h-40 flex-1 resize-none border-0 bg-transparent px-0 py-1.5 shadow-none focus-visible:ring-0 dark:bg-transparent"
           />

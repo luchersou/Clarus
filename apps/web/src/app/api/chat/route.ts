@@ -25,6 +25,16 @@ export async function POST(request: NextRequest) {
   if (!gatewayResponse.ok || !gatewayResponse.body) {
     const errorBody = await gatewayResponse.text().catch(() => null);
     console.error("Chat gateway error:", gatewayResponse.status, errorBody);
+
+    // Client errors (rate limit, validation, missing session) carry a message worth showing
+    const status = gatewayResponse.status;
+    if (status >= 400 && status < 500 && status !== 401) {
+      return NextResponse.json(
+        { error: gatewayErrorMessage(errorBody) ?? "The message couldn't be sent." },
+        { status },
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to reach chat service" },
       { status: 502 },
@@ -38,4 +48,17 @@ export async function POST(request: NextRequest) {
       Connection: "keep-alive",
     },
   });
+}
+
+// Nest error bodies look like { statusCode, message, error }; message may be a list
+function gatewayErrorMessage(body: string | null): string | null {
+  if (!body) return null;
+  try {
+    const { message } = JSON.parse(body) as { message?: unknown };
+    if (typeof message === "string") return message;
+    if (Array.isArray(message) && typeof message[0] === "string") return message[0];
+  } catch {
+    // Not JSON: fall back to the generic message
+  }
+  return null;
 }
